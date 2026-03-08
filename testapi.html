@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; background: #6750A4; color: white; border: none; border-radius: 5px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h2>🔌 Google Apps Script API Test</h2>
+    
+    <div>
+        <h3>Test 1: Direct API Call</h3>
+        <button onclick="testDirectAPI()">Test API Connection</button>
+        <pre id="result1">Click to test...</pre>
+    </div>
+    
+    <div>
+        <h3>Test 2: Login with Credentials</h3>
+        <input type="text" id="testUsername" placeholder="Username" value="AA9187"><br>
+        <input type="password" id="testPassword" placeholder="Password" value="A1234"><br>
+        <button onclick="testLogin()">Test Login</button>
+        <pre id="result2">Click to test...</pre>
+    </div>
+    
+    <div>
+        <h3>Test 3: JSONP Call</h3>
+        <button onclick="testJSONP()">Test JSONP</button>
+        <pre id="result3">Click to test...</pre>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9mZGt2G9CI9HZqel8YTmExiR2HWqDb2iEk7McgYYp5Iz2eWXkrcZFhNAPdu9HQtHE/exec';
+        
+        function testDirectAPI() {
+            const result = document.getElementById('result1');
+            result.textContent = 'Testing...';
+            
+            fetch(SCRIPT_URL + '?action=test')
+                .then(response => response.text())
+                .then(text => {
+                    result.textContent = 'Response: ' + text;
+                })
+                .catch(error => {
+                    result.textContent = 'Error: ' + error.message;
+                });
+        }
+        
+        function testLogin() {
+            const username = document.getElementById('testUsername').value;
+            const password = document.getElementById('testPassword').value;
+            const result = document.getElementById('result2');
+            
+            result.textContent = 'Testing login...';
+            
+            // Try JSONP approach
+            const callbackName = 'test_callback_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                result.textContent = 'Success! Response:\n' + JSON.stringify(data, null, 2);
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            const script = document.createElement('script');
+            script.src = SCRIPT_URL + '?action=login&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password) + '&callback=' + callbackName;
+            
+            script.onerror = function() {
+                result.textContent = 'Error: Failed to load script';
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            document.body.appendChild(script);
+            
+            // Timeout
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    result.textContent = 'Error: Timeout - no response';
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                }
+            }, 10000);
+        }
+        
+        function testJSONP() {
+            const result = document.getElementById('result3');
+            result.textContent = 'Testing JSONP...';
+            
+            const callbackName = 'jsonp_test_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                result.textContent = 'JSONP Success! Response:\n' + JSON.stringify(data, null, 2);
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            const script = document.createElement('script');
+            script.src = SCRIPT_URL + '?action=getTeam&callback=' + callbackName;
+            
+            script.onerror = function() {
+                result.textContent = 'Error: JSONP failed';
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>
