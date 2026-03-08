@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="style.css">
   
   <style>
-    /* Critical CSS for above-the-fold content */
+    /* Critical CSS */
     :root {
       --primary: #6750A4;
       --primary-light: #EADDFF;
@@ -57,7 +57,6 @@
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
     body {
       font-family: 'Inter', -apple-system, sans-serif;
       background: var(--surface);
@@ -65,11 +64,8 @@
       height: 100vh;
       overflow: hidden;
     }
-    
     #app { width: 100%; height: 100%; }
-    
     .app-shell { height: 100%; display: flex; flex-direction: column; }
-    
     .app-bar {
       background: var(--primary);
       color: var(--on-primary);
@@ -80,18 +76,14 @@
       align-items: center;
       z-index: 1000;
     }
-    
     .app-title { font-size: 20px; font-weight: 600; }
-    
     .main-content { flex: 1; overflow: hidden; position: relative; }
-    
     .page-container {
       height: 100%;
       overflow-y: auto;
       padding: var(--spacing-lg);
       padding-bottom: calc(80px + var(--safe-bottom));
     }
-    
     .bottom-nav {
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(20px);
@@ -106,7 +98,6 @@
       right: 0;
       z-index: 1000;
     }
-    
     .nav-item {
       display: flex;
       flex-direction: column;
@@ -120,12 +111,10 @@
       max-width: 80px;
       cursor: pointer;
     }
-    
     .nav-item.active {
       color: var(--primary);
       background: var(--primary-light);
     }
-    
     .fab {
       position: fixed;
       bottom: calc(80px + var(--safe-bottom));
@@ -143,7 +132,6 @@
       cursor: pointer;
       z-index: 999;
     }
-    
     .card {
       background: white;
       border-radius: var(--radius-md);
@@ -151,46 +139,34 @@
       margin-bottom: var(--spacing-lg);
       box-shadow: var(--shadow);
     }
-    
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: var(--spacing-md);
     }
-    
     .stat-card {
       background: var(--surface-container);
       border-radius: var(--radius-sm);
       padding: var(--spacing-lg);
       text-align: center;
     }
-    
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200% 100%;
       animation: loading 1.5s infinite;
       border-radius: var(--radius-sm);
     }
-    
     @keyframes loading {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-    
-    /* Report Types */
     .report-types {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-bottom: 24px;
     }
-    
     .report-type-card {
       background: var(--surface-container);
       border-radius: 16px;
@@ -201,12 +177,10 @@
       cursor: pointer;
       border: 2px solid transparent;
     }
-    
     .report-type-card.selected {
       border-color: var(--primary);
       background: var(--primary-light);
     }
-    
     .report-icon {
       width: 48px;
       height: 48px;
@@ -218,33 +192,14 @@
       justify-content: center;
       font-size: 24px;
     }
-    
     .report-type-card.selected .report-icon {
       background: var(--primary);
       color: white;
     }
-    
-    .report-title {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    
-    .report-desc {
-      font-size: 13px;
-      color: var(--outline);
-    }
-    
-    .date-range {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    
-    .format-options {
-      display: flex;
-      gap: 12px;
-    }
-    
+    .report-title { font-size: 16px; font-weight: 600; }
+    .report-desc { font-size: 13px; color: var(--outline); }
+    .date-range { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .format-options { display: flex; gap: 12px; }
     .format-option {
       flex: 1;
       padding: 12px;
@@ -253,12 +208,10 @@
       text-align: center;
       cursor: pointer;
     }
-    
     .format-option.selected {
       border-color: var(--primary);
       background: var(--primary-light);
     }
-    
     .toast-container {
       position: fixed;
       bottom: calc(80px + var(--safe-bottom) + var(--spacing-lg));
@@ -270,7 +223,6 @@
       align-items: center;
       pointer-events: none;
     }
-    
     .toast {
       background: var(--on-surface);
       color: white;
@@ -279,7 +231,6 @@
       font-size: 14px;
       animation: slideUp 0.3s ease;
     }
-    
     @keyframes slideUp {
       from { transform: translateY(100%); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
@@ -289,7 +240,6 @@
 <body>
   <div id="app">
     <div class="app-shell">
-      <!-- App Bar -->
       <div class="app-bar">
         <div class="app-bar-content">
           <div class="app-title">TrackMaster</div>
@@ -307,25 +257,20 @@
         </div>
       </div>
       
-      <!-- Offline Indicator -->
       <div id="offlineIndicator" class="offline-indicator" style="display: none;">
-        <span class="material-icons-round">cloud_off</span>
-        You're offline
+        <span class="material-icons-round">cloud_off</span> You're offline
       </div>
       
-      <!-- Main Content -->
       <div class="main-content">
         <div class="page-container">
           <div class="page" id="currentPage"></div>
         </div>
       </div>
       
-      <!-- Floating Action Button -->
       <button class="fab" onclick="window.location.href='newactivity.html'" title="New Activity">
         <span class="material-icons-round">add</span>
       </button>
       
-      <!-- Bottom Navigation -->
       <div class="bottom-nav">
         <a href="#" class="nav-item" onclick="handleNavClick('home'); return false;">
           <span class="material-icons-round nav-icon">home</span>
@@ -350,36 +295,31 @@
       </div>
     </div>
     
-    <!-- Install Prompt -->
     <div id="installPrompt" class="install-prompt" style="display: none;">
       <div class="install-header">
-        <div class="install-icon">
-          <span class="material-icons-round">install_mobile</span>
-        </div>
+        <div class="install-icon"><span class="material-icons-round">install_mobile</span></div>
         <div>
           <div class="install-title">Install TrackMaster</div>
           <div class="install-subtitle">Add to home screen</div>
         </div>
       </div>
       <div class="install-actions">
-        <button class="btn btn-primary" style="flex: 1;" onclick="installApp()">Install</button>
-        <button class="btn btn-secondary" style="flex: 1;" onclick="dismissInstall()">Not Now</button>
+        <button class="btn btn-primary" style="flex:1" onclick="installApp()">Install</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="dismissInstall()">Not Now</button>
       </div>
     </div>
     
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading">
       <div class="spinner"></div>
       <div id="loadingText">Loading...</div>
     </div>
     
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
   </div>
   
   <script src="api.js"></script>
   <script>
-    // ==================== OPTIMIZED APP STATE ====================
+    // App State
     const appState = {
       currentUser: null,
       isOnline: navigator.onLine,
@@ -392,36 +332,23 @@
       previewData: null
     };
     
-    // ==================== ENHANCED CACHE SYSTEM ====================
+    // Enhanced Cache System
     const pageCache = {
       data: new Map(),
-      maxAge: 5 * 60 * 1000, // 5 minutes
-      
+      maxAge: 5 * 60 * 1000,
       get(key) {
         const item = this.data.get(key);
-        if (item && (Date.now() - item.timestamp) < this.maxAge) {
-          return item.value;
-        }
+        if (item && (Date.now() - item.timestamp) < this.maxAge) return item.value;
         this.data.delete(key);
         return null;
       },
-      
-      set(key, value) {
-        this.data.set(key, {
-          value,
-          timestamp: Date.now()
-        });
-      },
-      
-      clear() {
-        this.data.clear();
-      }
+      set(key, value) { this.data.set(key, { value, timestamp: Date.now() }); },
+      clear() { this.data.clear(); }
     };
     
-    // ==================== PRELOADING SYSTEM ====================
+    // Preloading System
     const preloadQueue = ['myactivity', 'myteam', 'reports', 'more'];
     let preloadIndex = 0;
-    
     function preloadNextPages() {
       if (preloadIndex < preloadQueue.length) {
         const nextPage = preloadQueue[preloadIndex];
@@ -436,242 +363,109 @@
       }
     }
     
-    // ==================== SKELETON LOADERS ====================
+    // Skeleton Loaders
     function getOptimizedSkeleton(page) {
       const skeletons = {
-        home: `
-          <div class="card"><div class="skeleton" style="height: 24px; width: 60%;"></div></div>
-          <div class="stats-grid">
-            ${Array(4).fill().map(() => `
-              <div class="stat-card"><div class="skeleton" style="height: 40px;"></div></div>
-            `).join('')}
-          </div>
-        `,
-        myactivity: `
-          <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px;">
-            ${Array(3).fill().map(() => `<div class="skeleton" style="width: 80px; height: 36px; border-radius: 20px;"></div>`).join('')}
-          </div>
-          ${Array(2).fill().map(() => `
-            <div class="card">
-              <div class="skeleton" style="height: 24px; width: 40%;"></div>
-              ${Array(3).fill().map(() => `
-                <div class="skeleton" style="height: 80px; margin: 12px 0;"></div>
-              `).join('')}
-            </div>
-          `).join('')}
-        `,
-        myteam: `
-          <div class="card">
-            <div class="skeleton" style="height: 24px; width: 40%;"></div>
-            ${Array(4).fill().map(() => `
-              <div class="skeleton" style="height: 120px; margin: 12px 0;"></div>
-            `).join('')}
-          </div>
-        `,
-        reports: `
-          ${Array(2).fill().map(() => `
-            <div class="skeleton" style="height: 80px; margin-bottom: 12px; border-radius: 16px;"></div>
-          `).join('')}
-          <div class="card">
-            <div class="skeleton" style="height: 200px;"></div>
-          </div>
-        `,
-        more: `
-          <div class="card">
-            <div style="display: flex; gap: 16px;">
-              <div class="skeleton" style="width: 64px; height: 64px; border-radius: 50%;"></div>
-              <div style="flex:1"><div class="skeleton" style="height: 60px;"></div></div>
-            </div>
-          </div>
-          ${Array(4).fill().map(() => `<div class="skeleton" style="height: 70px; margin-bottom: 8px;"></div>`).join('')}
-        `
+        home: `<div class="card"><div class="skeleton" style="height:24px; width:60%"></div></div><div class="stats-grid">${Array(4).fill().map(()=>`<div class="stat-card"><div class="skeleton" style="height:40px"></div></div>`).join('')}</div>`,
+        myactivity: `<div class="filter-bar" style="display:flex; gap:10px; margin-bottom:20px;">${Array(3).fill().map(()=>`<div class="skeleton" style="width:80px; height:36px; border-radius:20px;"></div>`).join('')}</div>${Array(2).fill().map(()=>`<div class="card"><div class="skeleton" style="height:24px; width:40%"></div>${Array(3).fill().map(()=>`<div class="skeleton" style="height:80px; margin:12px 0;"></div>`).join('')}</div>`).join('')}`,
+        myteam: `<div class="card"><div class="skeleton" style="height:24px; width:40%"></div>${Array(4).fill().map(()=>`<div class="skeleton" style="height:120px; margin:12px 0;"></div>`).join('')}</div>`,
+        reports: `${Array(2).fill().map(()=>`<div class="skeleton" style="height:80px; margin-bottom:12px; border-radius:16px;"></div>`).join('')}<div class="card"><div class="skeleton" style="height:200px"></div></div>`,
+        more: `<div class="card"><div style="display:flex; gap:16px"><div class="skeleton" style="width:64px; height:64px; border-radius:50%"></div><div style="flex:1"><div class="skeleton" style="height:60px"></div></div></div></div>${Array(4).fill().map(()=>`<div class="skeleton" style="height:70px; margin-bottom:8px;"></div>`).join('')}`
       };
-      return skeletons[page] || '<div class="card"><div class="skeleton" style="height: 200px;"></div></div>';
+      return skeletons[page] || '<div class="card"><div class="skeleton" style="height:200px"></div></div>';
     }
     
-    // ==================== NAVIGATION ====================
+    // Navigation
     let navigationTimeout;
     function handleNavClick(page) {
       if (navigationTimeout) clearTimeout(navigationTimeout);
-      navigationTimeout = setTimeout(() => {
-        navigateTo(page);
-      }, 50); // Debounce rapid clicks
+      navigationTimeout = setTimeout(() => navigateTo(page), 50);
     }
     
     async function navigateTo(page, addToHistory = true) {
       event?.preventDefault();
-      
       appState.currentPage = page;
       updateActiveNav(page);
-      
-      if (addToHistory) {
-        history.pushState({ page }, '', '#' + page);
-      }
+      if (addToHistory) history.pushState({ page }, '', '#' + page);
       
       const container = document.getElementById('currentPage');
-      
-      // Check cache first - show instantly
       const cached = pageCache.get(page);
+      
       if (cached) {
         container.innerHTML = cached;
-        
-        // Refresh in background
         setTimeout(() => {
           loadPageContent(page, true).then(html => {
             if (html) {
               pageCache.set(page, html);
-              if (appState.currentPage === page) {
-                container.innerHTML = html;
-              }
+              if (appState.currentPage === page) container.innerHTML = html;
             }
           });
         }, 500);
-        
         return;
       }
       
-      // Show skeleton immediately
       container.innerHTML = getOptimizedSkeleton(page);
-      
-      // Load fresh content
       await loadPageContent(page);
-      
-      // Start preloading next pages
       preloadNextPages();
     }
     
     function updateActiveNav(page) {
       const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
-      document.querySelectorAll('.nav-item').forEach((item, index) => {
-        if (index === navMap[page]) {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
-        }
+      document.querySelectorAll('.nav-item').forEach((item, i) => {
+        item.classList.toggle('active', i === navMap[page]);
       });
     }
     
-    // ==================== PAGE LOADER ====================
+    // Page Loader
     async function loadPageContent(page, isBackground = false) {
-      if (!isBackground) {
-        document.getElementById('loading').style.display = 'flex';
-      }
-      
+      if (!isBackground) document.getElementById('loading').style.display = 'flex';
       try {
         let html = '';
-        
         switch(page) {
-          case 'home':
-            html = await loadDashboard();
-            break;
-          case 'myactivity':
-            html = await loadMyActivity();
-            break;
-          case 'myteam':
-            html = await loadMyTeam();
-            break;
-          case 'reports':
-            html = loadReports();
-            break;
-          case 'more':
-            html = loadMore();
-            break;
+          case 'home': html = await loadDashboard(); break;
+          case 'myactivity': html = await loadMyActivity(); break;
+          case 'myteam': html = await loadMyTeam(); break;
+          case 'reports': html = loadReports(); break;
+          case 'more': html = loadMore(); break;
         }
-        
         pageCache.set(page, html);
-        
         if (!isBackground) {
           document.getElementById('currentPage').innerHTML = html;
           if (page === 'reports') initReportsPage();
         }
-        
         return html;
-        
       } catch (error) {
         console.error('Error loading page:', error);
         if (!isBackground) {
           document.getElementById('currentPage').innerHTML = `
-            <div class="card" style="text-align: center; padding: 40px;">
-              <span class="material-icons-round" style="font-size: 48px; color: var(--error);">error</span>
+            <div class="card" style="text-align:center; padding:40px">
+              <span class="material-icons-round" style="font-size:48px; color:var(--error)">error</span>
               <h3>Failed to Load</h3>
-              <p style="color: var(--outline); margin: 16px 0;">${error.message}</p>
+              <p style="color:var(--outline); margin:16px 0">${error.message}</p>
               <button class="btn btn-primary" onclick="navigateTo('${page}')">Retry</button>
-            </div>
-          `;
+            </div>`;
         }
         return null;
       } finally {
-        if (!isBackground) {
-          document.getElementById('loading').style.display = 'none';
-        }
+        if (!isBackground) document.getElementById('loading').style.display = 'none';
       }
     }
     
-    // ==================== DASHBOARD ====================
+    // Dashboard
     async function loadDashboard() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
-      
       try {
-        // Load stats first
         const statsResult = await API.getDashboardStats(appState.currentUser.staffId);
-        
         let html = '';
-        
         if (statsResult.success) {
           const stats = statsResult.stats || {};
-          html = `
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <span class="material-icons-round">dashboard</span>
-                  Welcome, ${escapeHtml(appState.currentUser.name)}
-                </h3>
-              </div>
-              <div class="stats-grid">
-                <div class="stat-card">
-                  <div class="stat-value">${stats.weekly || 0}</div>
-                  <div class="stat-label">This Week</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value">${stats.monthly || 0}</div>
-                  <div class="stat-label">This Month</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value">${stats.total || 0}</div>
-                  <div class="stat-label">Total</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value">${stats.pending || 0}</div>
-                  <div class="stat-label">Pending</div>
-                </div>
-              </div>
-            </div>
-          `;
+          html = `<div class="card"><div class="card-header"><h3 class="card-title"><span class="material-icons-round">dashboard</span> Welcome, ${escapeHtml(appState.currentUser.name)}</h3></div><div class="stats-grid">${['weekly','monthly','total','pending'].map(k => `<div class="stat-card"><div class="stat-value">${stats[k]||0}</div><div class="stat-label">${k==='weekly'?'This Week':k==='monthly'?'This Month':k==='total'?'Total':'Pending'}</div></div>`).join('')}</div></div>`;
         }
-        
-        // Load activities in background
         setTimeout(async () => {
           try {
             const activitiesResult = await API.getUserActivities(appState.currentUser.staffId, 'all');
             if (activitiesResult.success && activitiesResult.activities?.length > 0) {
-              const recentHtml = `
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title">Recent Activities</h3>
-                  </div>
-                  <div class="activity-list">
-                    ${activitiesResult.activities.slice(0, 3).map(a => `
-                      <div class="activity-item" onclick="editActivity('${a.rowId}')">
-                        <div class="activity-header">
-                          <span class="activity-date">${a.date || ''}</span>
-                        </div>
-                        <div class="activity-description">${escapeHtml(a.description || '')}</div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `;
-              
+              const recentHtml = `<div class="card"><div class="card-header"><h3 class="card-title">Recent Activities</h3></div><div class="activity-list">${activitiesResult.activities.slice(0,3).map(a => `<div class="activity-item" onclick="editActivity('${a.rowId}')"><div class="activity-header"><span class="activity-date">${a.date||''}</span></div><div class="activity-description">${escapeHtml(a.description||'')}</div></div>`).join('')}</div></div>`;
               const container = document.getElementById('currentPage');
               if (container && appState.currentPage === 'home') {
                 container.innerHTML = html + recentHtml;
@@ -680,23 +474,18 @@
             }
           } catch (e) {}
         }, 500);
-        
         return html;
-        
       } catch (error) {
         return '<div class="card">Error loading dashboard</div>';
       }
     }
     
-    // ==================== MY ACTIVITY ====================
+    // My Activity
     async function loadMyActivity() {
       if (!appState.currentUser) return '<div class="card">Please login</div>';
-      
       try {
         const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
-        
         if (result.success && result.activities?.length > 0) {
-          // Group by month
           const grouped = {};
           result.activities.forEach(activity => {
             if (!activity.date) return;
@@ -706,706 +495,94 @@
             grouped[monthYear].push(activity);
           });
           
-          let html = `
-            <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;">
-              <button class="filter-chip active" onclick="filterActivities('all')">All</button>
-              <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
-              <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
-            </div>
-          `;
+          let html = `<div class="filter-bar" style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto;"><button class="filter-chip active" onclick="filterActivities('all')">All</button><button class="filter-chip" onclick="filterActivities('weekly')">This Week</button><button class="filter-chip" onclick="filterActivities('monthly')">This Month</button></div>`;
           
           Object.entries(grouped).forEach(([month, activities]) => {
-            html += `
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">${month}</h3>
-                  <span class="badge" style="background: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 12px;">${activities.length} activities</span>
-                </div>
-                <div class="activity-list">
-                  ${activities.map(a => `
-                    <div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')" style="cursor: pointer; border-left: 4px solid ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'};">
-                      <div class="activity-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span class="activity-date" style="font-weight: 600;">${a.date || 'No date'}</span>
-                        <span class="activity-day" style="color: ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">${a.status || 'Unknown'}</span>
-                      </div>
-                      <div class="activity-description" style="margin-bottom: 8px;">${escapeHtml(a.description || 'No description')}</div>
-                      <div class="activity-meta" style="display: flex; gap: 16px; font-size: 12px; color: var(--outline);">
-                        ${a.location ? `<span><span class="material-icons-round" style="font-size: 14px;">location_on</span> ${a.location}</span>` : ''}
-                        <span><span class="material-icons-round" style="font-size: 14px;">groups</span> ${a.teamMembers?.length || 1} members</span>
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            `;
+            html += `<div class="card"><div class="card-header"><h3 class="card-title">${month}</h3><span class="badge" style="background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:12px;">${activities.length} activities</span></div><div class="activity-list">${activities.map(a => `<div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')" style="cursor:pointer; border-left:4px solid ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'};"><div class="activity-header" style="display:flex; justify-content:space-between; margin-bottom:8px;"><span class="activity-date" style="font-weight:600;">${a.date||'No date'}</span><span class="activity-day" style="color:${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">${a.status||'Unknown'}</span></div><div class="activity-description" style="margin-bottom:8px;">${escapeHtml(a.description||'No description')}</div><div class="activity-meta" style="display:flex; gap:16px; font-size:12px; color:var(--outline);">${a.location ? `<span><span class="material-icons-round" style="font-size:14px;">location_on</span> ${a.location}</span>` : ''}<span><span class="material-icons-round" style="font-size:14px;">groups</span> ${a.teamMembers?.length || 1} members</span></div></div>`).join('')}</div></div>`;
           });
-          
           return html;
         }
-        
-        return `
-          <div class="card" style="text-align: center; padding: 40px 20px;">
-            <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">assignment</span>
-            <h3>No Activities Found</h3>
-            <p style="color: var(--outline); margin: 20px 0;">Start by adding your first activity</p>
-            <button class="btn btn-primary" onclick="window.location.href='newactivity.html'">
-              <span class="material-icons-round">add</span> Add New Activity
-            </button>
-          </div>
-        `;
+        return `<div class="card" style="text-align:center; padding:40px 20px;"><span class="material-icons-round" style="font-size:48px; color:var(--outline);">assignment</span><h3>No Activities Found</h3><p style="color:var(--outline); margin:20px 0;">Start by adding your first activity</p><button class="btn btn-primary" onclick="window.location.href='newactivity.html'"><span class="material-icons-round">add</span> Add New Activity</button></div>`;
       } catch (error) {
-        console.error('Activity error:', error);
         return '<div class="card">Error loading activities</div>';
       }
     }
     
-    // ==================== MY TEAM ====================
+    // My Team
     async function loadMyTeam() {
       try {
         const result = await API.getTeamMembers();
-        
         if (result.success && result.members?.length > 0) {
-          return `
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <span class="material-icons-round">groups</span>
-                  Team Members (${result.members.length})
-                </h3>
-              </div>
-              <div class="team-grid" style="display: grid; gap: 16px;">
-                ${result.members.map(member => `
-                  <div class="team-member" style="background: var(--surface-container); border-radius: 12px; padding: 16px;">
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                      <div class="member-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: ${getAvatarColor(member.staffId || '')}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-                        ${getInitials(member.name)}
-                      </div>
-                      <div>
-                        <h4 style="margin-bottom: 4px;">${escapeHtml(member.name || 'Unknown')}</h4>
-                        <div style="color: var(--outline); font-size: 13px;">${escapeHtml(member.designation || 'Team Member')}</div>
-                      </div>
-                    </div>
-                    <div style="font-size: 13px;">
-                      <div style="margin-bottom: 4px;"><strong>ID:</strong> ${escapeHtml(member.staffId || 'N/A')}</div>
-                      <div style="margin-bottom: 4px;"><strong>Contact:</strong> ${escapeHtml(member.contactNo || 'N/A')}</div>
-                      <div style="margin-bottom: 4px;"><strong>Email:</strong> ${escapeHtml(member.email || 'N/A')}</div>
-                      <div><strong>Role:</strong> ${escapeHtml(member.role || 'User')}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
+          return `<div class="card"><div class="card-header"><h3 class="card-title"><span class="material-icons-round">groups</span> Team Members (${result.members.length})</h3></div><div class="team-grid" style="display:grid; gap:16px;">${result.members.map(m => `<div class="team-member" style="background:var(--surface-container); border-radius:12px; padding:16px;"><div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;"><div class="member-avatar" style="width:48px; height:48px; border-radius:50%; background:${getAvatarColor(m.staffId||'')}; color:white; display:flex; align-items:center; justify-content:center; font-weight:600;">${getInitials(m.name)}</div><div><h4 style="margin-bottom:4px;">${escapeHtml(m.name||'Unknown')}</h4><div style="color:var(--outline); font-size:13px;">${escapeHtml(m.designation||'Team Member')}</div></div></div><div style="font-size:13px;"><div style="margin-bottom:4px;"><strong>ID:</strong> ${escapeHtml(m.staffId||'N/A')}</div><div style="margin-bottom:4px;"><strong>Contact:</strong> ${escapeHtml(m.contactNo||'N/A')}</div><div style="margin-bottom:4px;"><strong>Email:</strong> ${escapeHtml(m.email||'N/A')}</div><div><strong>Role:</strong> ${escapeHtml(m.role||'User')}</div></div></div>`).join('')}</div></div>`;
         }
-        
         return '<div class="card">No team members found</div>';
       } catch (error) {
         return '<div class="card">Error loading team</div>';
       }
     }
     
-    // ==================== REPORTS ====================
+    // Reports
     function loadReports() {
       return `
         <div class="report-types">
           <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
-            <div class="report-icon">
-              <span class="material-icons-round">calendar_month</span>
-            </div>
-            <div class="report-text">
-              <div class="report-title">Weekly Timesheet</div>
-              <div class="report-desc">Last 7 days summary</div>
-            </div>
+            <div class="report-icon"><span class="material-icons-round">calendar_month</span></div>
+            <div class="report-text"><div class="report-title">Weekly Timesheet</div><div class="report-desc">Last 7 days summary</div></div>
           </div>
-          
           <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
-            <div class="report-icon">
-              <span class="material-icons-round">calendar_today</span>
-            </div>
-            <div class="report-text">
-              <div class="report-title">Monthly Report</div>
-              <div class="report-desc">Complete month summary</div>
-            </div>
+            <div class="report-icon"><span class="material-icons-round">calendar_today</span></div>
+            <div class="report-text"><div class="report-title">Monthly Report</div><div class="report-desc">Complete month summary</div></div>
           </div>
         </div>
-        
         <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">settings</span>
-              Report Configuration
-            </h3>
-          </div>
-          
-          <div class="form-group" style="margin-bottom: 16px;">
+          <div class="card-header"><h3 class="card-title"><span class="material-icons-round">settings</span> Report Configuration</h3></div>
+          <div class="form-group" style="margin-bottom:16px;">
             <label class="form-label required">Date Range</label>
             <div class="date-range">
-              <div>
-                <label style="font-size: 12px; color: var(--outline);">Start Date</label>
-                <input type="date" class="form-input" id="startDate" style="width: 100%; padding: 10px; border: 1px solid var(--outline); border-radius: 8px;" required>
-              </div>
-              <div>
-                <label style="font-size: 12px; color: var(--outline);">End Date</label>
-                <input type="date" class="form-input" id="endDate" style="width: 100%; padding: 10px; border: 1px solid var(--outline); border-radius: 8px;" required>
-              </div>
+              <div><label style="font-size:12px; color:var(--outline);">Start Date</label><input type="date" class="form-input" id="startDate" style="width:100%; padding:10px; border:1px solid var(--outline); border-radius:8px;" required></div>
+              <div><label style="font-size:12px; color:var(--outline);">End Date</label><input type="date" class="form-input" id="endDate" style="width:100%; padding:10px; border:1px solid var(--outline); border-radius:8px;" required></div>
             </div>
           </div>
-          
-          <div class="form-group" style="margin-bottom: 16px;">
+          <div class="form-group" style="margin-bottom:16px;">
             <label class="form-label required">Format</label>
             <div class="format-options">
-              <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
-                <div class="format-icon"><i class="fas fa-file-pdf"></i></div>
-                <div class="format-name">PDF</div>
-              </div>
-              <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')">
-                <div class="format-icon"><i class="fas fa-file-excel"></i></div>
-                <div class="format-name">Excel</div>
-              </div>
-              <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
-                <div class="format-icon"><i class="fas fa-file-csv"></i></div>
-                <div class="format-name">CSV</div>
-              </div>
+              <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')"><div class="format-icon"><i class="fas fa-file-pdf"></i></div><div class="format-name">PDF</div></div>
+              <div class="format-option ${appState.format === 'excel' ? 'selected' : ''}" onclick="selectFormat('excel')"><div class="format-icon"><i class="fas fa-file-excel"></i></div><div class="format-name">Excel</div></div>
+              <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')"><div class="format-icon"><i class="fas fa-file-csv"></i></div><div class="format-name">CSV</div></div>
             </div>
           </div>
-          
-          <div style="display: flex; gap: 16px; margin-top: 24px;">
-            <button class="btn btn-secondary" style="flex: 1; padding: 12px;" onclick="previewReport()">
-              <span class="material-icons-round">visibility</span> Preview
-            </button>
-            <button class="btn btn-primary" style="flex: 1; padding: 12px;" onclick="generateReport()">
-              <span class="material-icons-round">download</span> Download
-            </button>
+          <div style="display:flex; gap:16px; margin-top:24px;">
+            <button class="btn btn-secondary" style="flex:1; padding:12px;" onclick="previewReport()"><span class="material-icons-round">visibility</span> Preview</button>
+            <button class="btn btn-primary" style="flex:1; padding:12px;" onclick="generateReport()"><span class="material-icons-round">download</span> Download</button>
           </div>
         </div>
-        
-        <div class="report-preview" id="reportPreview" style="display: none; background: var(--surface-container); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-          <div class="preview-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div class="report-preview" id="reportPreview" style="display:none; background:var(--surface-container); border-radius:12px; padding:20px; margin-bottom:24px;">
+          <div class="preview-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <h3>Report Preview</h3>
-            <button class="action-btn" onclick="closePreview()" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface); cursor: pointer;">
-              <i class="fas fa-times"></i>
-            </button>
+            <button class="action-btn" onclick="closePreview()" style="width:32px; height:32px; border-radius:50%; border:none; background:var(--surface); cursor:pointer;"><i class="fas fa-times"></i></button>
           </div>
-          <div class="preview-content" id="previewContent" style="max-height: 300px; overflow-y: auto; background: var(--surface); padding: 12px; border-radius: 8px;"></div>
+          <div class="preview-content" id="previewContent" style="max-height:300px; overflow-y:auto; background:var(--surface); padding:12px; border-radius:8px;"></div>
         </div>
-        
-        <div class="recent-reports" style="background: var(--surface-container); border-radius: 12px; padding: 20px;">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 class="card-title">
-              <span class="material-icons-round">history</span>
-              Recent Reports
-            </h3>
+        <div class="recent-reports" style="background:var(--surface-container); border-radius:12px; padding:20px;">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 class="card-title"><span class="material-icons-round">history</span> Recent Reports</h3>
           </div>
-          
-          <div class="reports-list" id="recentReportsList" style="display: flex; flex-direction: column; gap: 12px;">
-            ${renderRecentReports()}
-          </div>
+          <div class="reports-list" id="recentReportsList" style="display:flex; flex-direction:column; gap:12px;">${renderRecentReports()}</div>
         </div>
       `;
     }
     
     function renderRecentReports() {
-      if (!appState.recentReports || appState.recentReports.length === 0) {
-        return '<div style="text-align: center; padding: 20px; color: var(--outline);">No recent reports</div>';
-      }
-      
-      return appState.recentReports.slice(0, 5).map((report, index) => {
-        const icon = report.format === 'pdf' ? 'file-pdf' : 
-                    report.format === 'excel' ? 'file-excel' : 'file-csv';
-        
-        return `
-          <div class="report-item" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface); border-radius: 8px;">
-            <div class="report-item-icon" style="width: 40px; height: 40px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <i class="fas fa-${icon}"></i>
-            </div>
-            <div class="report-item-info" style="flex: 1;">
-              <div class="report-item-name" style="font-weight: 600;">${report.name || 'Report'}</div>
-              <div class="report-item-details" style="display: flex; gap: 12px; font-size: 12px; color: var(--outline);">
-                <span>${report.type || 'Report'}</span>
-                <span>${report.date || ''}</span>
-              </div>
-            </div>
-            <div class="report-item-actions" style="display: flex; gap: 4px;">
-              <button class="action-btn" onclick="downloadRecentReport(${index})" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface); cursor: pointer;">
-                <i class="fas fa-download"></i>
-              </button>
-              <button class="action-btn" onclick="deleteRecentReport(${index})" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface); cursor: pointer;">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `;
+      if (!appState.recentReports?.length) return '<div style="text-align:center; padding:20px; color:var(--outline);">No recent reports</div>';
+      return appState.recentReports.slice(0,5).map((r,i) => {
+        const icon = r.format === 'pdf' ? 'file-pdf' : r.format === 'excel' ? 'file-excel' : 'file-csv';
+        return `<div class="report-item" style="display:flex; align-items:center; gap:12px; padding:12px; background:var(--surface); border-radius:8px;"><div class="report-item-icon" style="width:40px; height:40px; border-radius:8px; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center;"><i class="fas fa-${icon}"></i></div><div class="report-item-info" style="flex:1;"><div class="report-item-name" style="font-weight:600;">${r.name||'Report'}</div><div class="report-item-details" style="display:flex; gap:12px; font-size:12px; color:var(--outline);"><span>${r.type||'Report'}</span><span>${r.date||''}</span></div></div><div class="report-item-actions" style="display:flex; gap:4px;"><button class="action-btn" onclick="downloadRecentReport(${i})" style="width:32px; height:32px; border-radius:50%; border:none; background:var(--surface); cursor:pointer;"><i class="fas fa-download"></i></button><button class="action-btn" onclick="deleteRecentReport(${i})" style="width:32px; height:32px; border-radius:50%; border:none; background:var(--surface); cursor:pointer;"><i class="fas fa-trash"></i></button></div></div>`;
       }).join('');
     }
     
-    // ==================== MORE TAB ====================
+    // More Tab
     function loadMore() {
       return `
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <span class="material-icons-round">person</span>
-              Profile
-            </h3>
-          </div>
-          <div style="display: flex; align-items: center; gap: 24px; padding: 16px;">
-            <div class="member-avatar" style="width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
-              ${getInitials(appState.currentUser?.name)}
-            </div>
-            <div>
-              <h4>${escapeHtml(appState.currentUser?.name || 'User')}</h4>
-              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.staffId || '')}</div>
-              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.designation || '')}</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="more-menu" style="display: flex; flex-direction: column; gap: 8px;">
-          <div class="more-item" onclick="showProfile()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">edit</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Edit Profile</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Update your information</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showNotificationsSettings()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">notifications</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Notifications</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Manage preferences</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showPrivacySettings()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">security</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Privacy & Security</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Manage settings</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showHelp()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">help</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Help & Support</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">FAQs and support</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="clearCache()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">delete</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">Clear Cache</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Free up space</div>
-            </div>
-          </div>
-          
-          <div class="more-item" onclick="showAbout()" style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface-container); border-radius: 12px; cursor: pointer;">
-            <div class="more-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons-round">info</span>
-            </div>
-            <div class="more-content" style="flex: 1;">
-              <div class="more-title" style="font-weight: 600;">About</div>
-              <div class="more-subtitle" style="font-size: 12px; color: var(--outline);">Version 1.0.0</div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Storage Info</h3>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--outline);">
-              <span style="color: var(--outline);">Offline Activities</span>
-              <span style="font-weight: 500;">${appState.offlineActivities.length}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--outline);">
-              <span style="color: var(--outline);">Recent Reports</span>
-              <span style="font-weight: 500;">${appState.recentReports.length}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-              <span style="color: var(--outline);">Storage Used</span>
-              <span style="font-weight: 500;">${(JSON.stringify(localStorage).length / 1024).toFixed(2)} KB</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    // ==================== FILTER ACTIVITIES ====================
-    async function filterActivities(filter) {
-      document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
-      event.target.classList.add('active');
-      
-      document.getElementById('loading').style.display = 'flex';
-      
-      try {
-        const result = await API.getUserActivities(appState.currentUser.staffId, filter);
-        
-        if (result.success) {
-          pageCache.delete('myactivity');
-          await loadPageContent('myactivity');
-        }
-      } catch (error) {
-        showToast('Error filtering activities', 'error');
-      } finally {
-        document.getElementById('loading').style.display = 'none';
-      }
-    }
-    
-    // ==================== REPORT FUNCTIONS ====================
-    function selectReportType(type) {
-      appState.reportType = type;
-      document.querySelectorAll('.report-type-card').forEach(c => c.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
-      
-      const today = new Date();
-      const startDate = new Date(today);
-      startDate.setDate(today.getDate() - (type === 'weekly' ? 7 : 30));
-      
-      document.getElementById('startDate').valueAsDate = startDate;
-      document.getElementById('endDate').valueAsDate = today;
-    }
-    
-    function selectFormat(format) {
-      appState.format = format;
-      document.querySelectorAll('.format-option').forEach(o => o.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
-    }
-    
-    function initReportsPage() {
-      const today = new Date();
-      const startDate = new Date(today);
-      startDate.setDate(today.getDate() - 7);
-      
-      const startInput = document.getElementById('startDate');
-      const endInput = document.getElementById('endDate');
-      
-      if (startInput && endInput) {
-        startInput.valueAsDate = startDate;
-        endInput.valueAsDate = today;
-      }
-    }
-    
-    async function previewReport() {
-      const startDate = document.getElementById('startDate')?.value;
-      const endDate = document.getElementById('endDate')?.value;
-      
-      if (!startDate || !endDate) {
-        showToast('Select dates', 'error');
-        return;
-      }
-      
-      showLoading('Loading preview...');
-      
-      try {
-        const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
-        
-        if (result.success) {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          
-          const filtered = (result.activities || []).filter(a => {
-            const ad = new Date(a.date);
-            return ad >= start && ad <= end;
-          });
-          
-          const previewContent = document.getElementById('previewContent');
-          
-          if (filtered.length === 0) {
-            previewContent.innerHTML = '<div style="text-align: center; padding: 20px;">No activities found</div>';
-          } else {
-            previewContent.innerHTML = `
-              <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr style="background: var(--primary-light);">
-                    <th style="padding: 8px; text-align: left;">Date</th>
-                    <th style="padding: 8px; text-align: left;">Description</th>
-                    <th style="padding: 8px; text-align: left;">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${filtered.slice(0, 10).map(a => `
-                    <tr style="border-bottom: 1px solid var(--outline);">
-                      <td style="padding: 8px;">${a.date}</td>
-                      <td style="padding: 8px;">${escapeHtml(a.description).substring(0, 30)}${a.description?.length > 30 ? '...' : ''}</td>
-                      <td style="padding: 8px;">${a.status}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-              ${filtered.length > 10 ? `<div style="margin-top: 8px; color: var(--outline);">... and ${filtered.length - 10} more</div>` : ''}
-            `;
-          }
-          
-          document.getElementById('reportPreview').style.display = 'block';
-        }
-      } catch (error) {
-        showToast('Preview failed', 'error');
-      } finally {
-        hideLoading();
-      }
-    }
-    
-    function closePreview() {
-      document.getElementById('reportPreview').style.display = 'none';
-    }
-    
-    async function generateReport() {
-      const startDate = document.getElementById('startDate')?.value;
-      const endDate = document.getElementById('endDate')?.value;
-      
-      if (!startDate || !endDate) {
-        showToast('Select dates', 'error');
-        return;
-      }
-      
-      showLoading('Generating...');
-      
-      try {
-        const result = await API.generateReport(
-          appState.currentUser.staffId,
-          appState.reportType,
-          appState.format,
-          startDate,
-          endDate
-        );
-        
-        if (result.success) {
-          const report = {
-            id: Date.now(),
-            name: `${appState.reportType === 'weekly' ? 'Weekly' : 'Monthly'} Report`,
-            type: appState.reportType,
-            format: appState.format,
-            date: new Date().toLocaleDateString()
-          };
-          
-          appState.recentReports.unshift(report);
-          if (appState.recentReports.length > 10) appState.recentReports.pop();
-          localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
-          
-          document.getElementById('recentReportsList').innerHTML = renderRecentReports();
-          showToast('Report generated', 'success');
-        }
-      } catch (error) {
-        showToast('Generation failed', 'error');
-      } finally {
-        hideLoading();
-      }
-    }
-    
-    function downloadRecentReport(index) {
-      showToast('Downloading...', 'info');
-    }
-    
-    function deleteRecentReport(index) {
-      if (confirm('Delete this report?')) {
-        appState.recentReports.splice(index, 1);
-        localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
-        document.getElementById('recentReportsList').innerHTML = renderRecentReports();
-        showToast('Report deleted', 'success');
-      }
-    }
-    
-    // ==================== MORE FUNCTIONS ====================
-    function showProfile() { showToast('Profile settings', 'info'); }
-    function showNotificationsSettings() { showToast('Notifications settings', 'info'); }
-    function showPrivacySettings() { showToast('Privacy settings', 'info'); }
-    function showHelp() { window.open('mailto:support@trackmaster.com'); }
-    function showAbout() { showToast('TrackMaster v1.0.0', 'info'); }
-    
-    // ==================== HELPER FUNCTIONS ====================
-    function getInitials(name) {
-      if (!name) return 'U';
-      return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    }
-    
-    function getAvatarColor(id) {
-      const colors = ['#6750A4', '#0D904F', '#DC3545', '#FFC107', '#17A2B8'];
-      const index = (id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length;
-      return colors[index];
-    }
-    
-    function escapeHtml(unsafe) {
-      if (!unsafe) return '';
-      return String(unsafe)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-    
-    function editActivity(rowId) {
-      sessionStorage.setItem('editActivityId', rowId);
-      window.location.href = 'newactivity.html?edit=' + rowId;
-    }
-    
-    function showNotifications() {
-      showToast('No new notifications', 'info');
-    }
-    
-    // ==================== INSTALL PROMPT ====================
-    function checkInstallPrompt() {
-      if (appState.deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
-        document.getElementById('installPrompt').style.display = 'block';
-      }
-    }
-    
-    function installApp() {
-      if (appState.deferredPrompt) {
-        appState.deferredPrompt.prompt();
-        appState.deferredPrompt = null;
-        document.getElementById('installPrompt').style.display = 'none';
-      }
-    }
-    
-    function dismissInstall() {
-      document.getElementById('installPrompt').style.display = 'none';
-      localStorage.setItem('installPromptDismissed', Date.now());
-    }
-    
-    // ==================== SYNC OFFLINE ====================
-    async function syncOfflineActivities() {
-      if (appState.offlineActivities.length > 0) {
-        for (const activity of appState.offlineActivities) {
-          try { await API.saveActivity(activity); } catch (e) {}
-        }
-        appState.offlineActivities = [];
-        localStorage.removeItem('offlineActivities');
-        showToast('Sync completed', 'success');
-      }
-    }
-    
-    // ==================== UTILITY FUNCTIONS ====================
-    function showLoading(text) {
-      document.getElementById('loadingText').textContent = text || 'Loading...';
-      document.getElementById('loading').style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      document.getElementById('loading').style.display = 'none';
-    }
-    
-    function refreshData() {
-      pageCache.clear();
-      if (API.cache) API.cache.clear();
-      loadPageContent(appState.currentPage);
-      showToast('Refreshed', 'success');
-    }
-    
-    function logout() {
-      if (confirm('Logout?')) {
-        localStorage.removeItem('trackmaster_user');
-        sessionStorage.removeItem('trackmaster_session');
-        window.location.href = 'login.html';
-      }
-    }
-    
-    function showToast(message, type) {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.getElementById('toastContainer').appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-    
-    function clearCache() {
-      if (confirm('Clear cache?')) {
-        pageCache.clear();
-        if (API.cache) API.cache.clear();
-        appState.offlineActivities = [];
-        localStorage.removeItem('offlineActivities');
-        showToast('Cache cleared', 'success');
-        loadPageContent('more');
-      }
-    }
-    
-    // ==================== INITIALIZE ====================
-    function checkAuth() {
-      const savedUser = localStorage.getItem('trackmaster_user');
-      const sessionUser = sessionStorage.getItem('trackmaster_session');
-      
-      if (savedUser) {
-        try {
-          const userData = JSON.parse(savedUser);
-          if (Date.now() < (userData.expiry || 0)) {
-            appState.currentUser = userData;
-            return true;
-          }
-        } catch (e) {}
-      } else if (sessionUser) {
-        try {
-          appState.currentUser = JSON.parse(sessionUser);
-          return true;
-        } catch (e) {}
-      }
-      
-      window.location.href = 'login.html';
-      return false;
-    }
-    
-    function setupEventListeners() {
-      window.addEventListener('online', () => {
-        appState.isOnline = true;
-        document.getElementById('offlineIndicator').style.display = 'none';
-        showToast('You are back online!', 'success');
-        syncOfflineActivities();
-      });
-      
-      window.addEventListener('offline', () => {
-        appState.isOnline = false;
-        document.getElementById('offlineIndicator').style.display = 'flex';
-        showToast('You are offline', 'warning');
-      });
-      
-      window.addEventListener('popstate', (e) => {
-        const page = e.state?.page || 'home';
-        navigateTo(page, false);
-      });
-      
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        appState.deferredPrompt = e;
-      });
-    }
-    
-    function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-          console.log('ServiceWorker registration failed:', err);
-        });
-      }
-    }
-    
-    async function initApp() {
-      if (!checkAuth()) return;
-      
-      setupEventListeners();
-      registerServiceWorker();
-      
-      const hash = window.location.hash.substring(1);
-      const initialPage = hash || 'home';
-      
-      updateActiveNav(initialPage);
-      await navigateTo(initialPage, false);
-      
-      setTimeout(checkInstallPrompt, 3000);
-    }
-    
-    window.onload = initApp;
-  </script>
-</body>
-</html>
+        <div class="card"><div class="card-header"><h3 class="card-title"><span class="material-icons-round">person</span> Profile</h3></div><div style="display:flex; align-items:center; gap:24px; padding:16px;"><div class="member-avatar" style="width:64px; height:64px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600;">${getInitials(appState.currentUser?.name)}</div><div><h4>${escapeHtml(appState.currentUser?.name||'User')}</h4><div style="color:var(--outline);">${escapeHtml(appState.currentUser?.staffId||'')}</div><div style="color:var(--outline);">${escapeHtml(appState.currentUser?.designation||'')}</div></div></div></div>
+        <div class="more-menu" style="display:flex; flex-direction:column; gap:8px;">
+          ${[
