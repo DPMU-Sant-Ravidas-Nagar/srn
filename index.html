@@ -586,3 +586,203 @@
         <div class="card"><div class="card-header"><h3 class="card-title"><span class="material-icons-round">person</span> Profile</h3></div><div style="display:flex; align-items:center; gap:24px; padding:16px;"><div class="member-avatar" style="width:64px; height:64px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600;">${getInitials(appState.currentUser?.name)}</div><div><h4>${escapeHtml(appState.currentUser?.name||'User')}</h4><div style="color:var(--outline);">${escapeHtml(appState.currentUser?.staffId||'')}</div><div style="color:var(--outline);">${escapeHtml(appState.currentUser?.designation||'')}</div></div></div></div>
         <div class="more-menu" style="display:flex; flex-direction:column; gap:8px;">
           ${[
+            ['edit', 'Edit Profile', 'Update your information'],
+            ['notifications', 'Notifications', 'Manage preferences'],
+            ['security', 'Privacy & Security', 'Manage settings'],
+            ['help', 'Help & Support', 'FAQs and support'],
+            ['delete', 'Clear Cache', 'Free up space'],
+            ['info', 'About', 'Version 1.0.0']
+          ].map(([icon, title, subtitle]) => `
+            <div class="more-item" onclick="${icon==='edit'?'showProfile':icon==='notifications'?'showNotificationsSettings':icon==='security'?'showPrivacySettings':icon==='help'?'showHelp':icon==='delete'?'clearCache':'showAbout'}()" style="display:flex; align-items:center; gap:16px; padding:16px; background:var(--surface-container); border-radius:12px; cursor:pointer;">
+              <div class="more-icon" style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center;"><span class="material-icons-round">${icon}</span></div>
+              <div class="more-content" style="flex:1;"><div class="more-title" style="font-weight:600;">${title}</div><div class="more-subtitle" style="font-size:12px; color:var(--outline);">${subtitle}</div></div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="card"><div class="card-header"><h3 class="card-title">Storage Info</h3></div><div style="display:flex; flex-direction:column; gap:8px;">${[['Offline Activities',appState.offlineActivities.length],['Recent Reports',appState.recentReports.length],['Storage Used',(JSON.stringify(localStorage).length/1024).toFixed(2)+' KB']].map(([label,value])=>`<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--outline);"><span style="color:var(--outline);">${label}</span><span style="font-weight:500;">${value}</span></div>`).join('')}</div></div>
+      `;
+    }
+    
+    // Filter Activities
+    async function filterActivities(filter) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const result = await API.getUserActivities(appState.currentUser.staffId, filter);
+        if (result.success) {
+          pageCache.delete('myactivity');
+          await loadPageContent('myactivity');
+        }
+      } catch (error) {
+        showToast('Error filtering activities', 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    // Report Functions
+    function selectReportType(type) {
+      appState.reportType = type;
+      document.querySelectorAll('.report-type-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      const today = new Date();
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - (type === 'weekly' ? 7 : 30));
+      document.getElementById('startDate').valueAsDate = startDate;
+      document.getElementById('endDate').valueAsDate = today;
+    }
+    
+    function selectFormat(format) {
+      appState.format = format;
+      document.querySelectorAll('.format-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+    }
+    
+    function initReportsPage() {
+      const today = new Date();
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - 7);
+      const startInput = document.getElementById('startDate');
+      const endInput = document.getElementById('endDate');
+      if (startInput && endInput) {
+        startInput.valueAsDate = startDate;
+        endInput.valueAsDate = today;
+      }
+    }
+    
+    async function previewReport() {
+      const startDate = document.getElementById('startDate')?.value;
+      const endDate = document.getElementById('endDate')?.value;
+      if (!startDate || !endDate) { showToast('Select dates', 'error'); return; }
+      showLoading('Loading preview...');
+      try {
+        const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
+        if (result.success) {
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const filtered = (result.activities || []).filter(a => {
+            const ad = new Date(a.date);
+            return ad >= start && ad <= end;
+          });
+          const previewContent = document.getElementById('previewContent');
+          if (filtered.length === 0) {
+            previewContent.innerHTML = '<div style="text-align:center; padding:20px;">No activities found</div>';
+          } else {
+            previewContent.innerHTML = `<table style="width:100%; border-collapse:collapse;"><thead><tr style="background:var(--primary-light);"><th style="padding:8px; text-align:left;">Date</th><th style="padding:8px; text-align:left;">Description</th><th style="padding:8px; text-align:left;">Status</th></tr></thead><tbody>${filtered.slice(0,10).map(a => `<tr style="border-bottom:1px solid var(--outline);"><td style="padding:8px;">${a.date}</td><td style="padding:8px;">${escapeHtml(a.description).substring(0,30)}${a.description?.length>30?'...':''}</td><td style="padding:8px;">${a.status}</td></tr>`).join('')}</tbody></table>${filtered.length>10?`<div style="margin-top:8px; color:var(--outline);">... and ${filtered.length-10} more</div>`:''}`;
+          }
+          document.getElementById('reportPreview').style.display = 'block';
+        }
+      } catch (error) {
+        showToast('Preview failed', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function closePreview() {
+      document.getElementById('reportPreview').style.display = 'none';
+    }
+    
+    async function generateReport() {
+      const startDate = document.getElementById('startDate')?.value;
+      const endDate = document.getElementById('endDate')?.value;
+      if (!startDate || !endDate) { showToast('Select dates', 'error'); return; }
+      showLoading('Generating...');
+      try {
+        const result = await API.generateReport(appState.currentUser.staffId, appState.reportType, appState.format, startDate, endDate);
+        if (result.success) {
+          const report = { id: Date.now(), name: `${appState.reportType==='weekly'?'Weekly':'Monthly'} Report`, type: appState.reportType, format: appState.format, date: new Date().toLocaleDateString() };
+          appState.recentReports.unshift(report);
+          if (appState.recentReports.length > 10) appState.recentReports.pop();
+          localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
+          document.getElementById('recentReportsList').innerHTML = renderRecentReports();
+          showToast('Report generated', 'success');
+        }
+      } catch (error) {
+        showToast('Generation failed', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function downloadRecentReport(index) { showToast('Downloading...', 'info'); }
+    function deleteRecentReport(index) {
+      if (confirm('Delete this report?')) {
+        appState.recentReports.splice(index, 1);
+        localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
+        document.getElementById('recentReportsList').innerHTML = renderRecentReports();
+        showToast('Report deleted', 'success');
+      }
+    }
+    
+    // More Functions
+    function showProfile() { showToast('Profile settings', 'info'); }
+    function showNotificationsSettings() { showToast('Notifications settings', 'info'); }
+    function showPrivacySettings() { showToast('Privacy settings', 'info'); }
+    function showHelp() { window.open('mailto:support@trackmaster.com'); }
+    function showAbout() { showToast('TrackMaster v1.0.0', 'info'); }
+    
+    // Helper Functions
+    function getInitials(name) { return name ? name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'U'; }
+    function getAvatarColor(id) { const colors = ['#6750A4','#0D904F','#DC3545','#FFC107','#17A2B8']; return colors[(id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0)%colors.length]; }
+    function escapeHtml(unsafe) { if (!unsafe) return ''; return String(unsafe).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]); }
+    function editActivity(rowId) { sessionStorage.setItem('editActivityId', rowId); window.location.href = 'newactivity.html?edit=' + rowId; }
+    function showNotifications() { showToast('No new notifications', 'info'); }
+    
+    // Install Prompt
+    function checkInstallPrompt() { if (appState.deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) document.getElementById('installPrompt').style.display = 'block'; }
+    function installApp() { if (appState.deferredPrompt) { appState.deferredPrompt.prompt(); appState.deferredPrompt = null; document.getElementById('installPrompt').style.display = 'none'; } }
+    function dismissInstall() { document.getElementById('installPrompt').style.display = 'none'; localStorage.setItem('installPromptDismissed', Date.now()); }
+    
+    // Sync Offline
+    async function syncOfflineActivities() {
+      if (appState.offlineActivities.length > 0) {
+        for (const activity of appState.offlineActivities) { try { await API.saveActivity(activity); } catch (e) {} }
+        appState.offlineActivities = [];
+        localStorage.removeItem('offlineActivities');
+        showToast('Sync completed', 'success');
+      }
+    }
+    
+    // Utility Functions
+    function showLoading(text) { document.getElementById('loadingText').textContent = text || 'Loading...'; document.getElementById('loading').style.display = 'flex'; }
+    function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+    function refreshData() { pageCache.clear(); if (API.cache) API.cache.clear(); loadPageContent(appState.currentPage); showToast('Refreshed', 'success'); }
+    function logout() { if (confirm('Logout?')) { localStorage.removeItem('trackmaster_user'); sessionStorage.removeItem('trackmaster_session'); window.location.href = 'login.html'; } }
+    function showToast(message, type) { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = message; document.getElementById('toastContainer').appendChild(toast); setTimeout(() => toast.remove(), 3000); }
+    function clearCache() { if (confirm('Clear cache?')) { pageCache.clear(); if (API.cache) API.cache.clear(); appState.offlineActivities = []; localStorage.removeItem('offlineActivities'); showToast('Cache cleared', 'success'); loadPageContent('more'); } }
+    
+    // Initialize
+    function checkAuth() {
+      const savedUser = localStorage.getItem('trackmaster_user');
+      const sessionUser = sessionStorage.getItem('trackmaster_session');
+      if (savedUser) { try { const userData = JSON.parse(savedUser); if (Date.now() < (userData.expiry || 0)) { appState.currentUser = userData; return true; } } catch (e) {} }
+      else if (sessionUser) { try { appState.currentUser = JSON.parse(sessionUser); return true; } catch (e) {} }
+      window.location.href = 'login.html'; return false;
+    }
+    
+    function setupEventListeners() {
+      window.addEventListener('online', () => { appState.isOnline = true; document.getElementById('offlineIndicator').style.display = 'none'; showToast('You are back online!', 'success'); syncOfflineActivities(); });
+      window.addEventListener('offline', () => { appState.isOnline = false; document.getElementById('offlineIndicator').style.display = 'flex'; showToast('You are offline', 'warning'); });
+      window.addEventListener('popstate', (e) => { const page = e.state?.page || 'home'; navigateTo(page, false); });
+      window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); appState.deferredPrompt = e; });
+    }
+    
+    function registerServiceWorker() { if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker registration failed:', err)); } }
+    
+    async function initApp() {
+      if (!checkAuth()) return;
+      setupEventListeners();
+      registerServiceWorker();
+      const hash = window.location.hash.substring(1);
+      const initialPage = hash || 'home';
+      updateActiveNav(initialPage);
+      await navigateTo(initialPage, false);
+      setTimeout(checkInstallPrompt, 3000);
+    }
+    
+    window.onload = initApp;
+  </script>
+</body>
+</html>
