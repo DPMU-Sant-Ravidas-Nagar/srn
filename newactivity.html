@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6750A4">
+  
+  <!-- Preconnect for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js"></script>
+  
+  <style>
+    .container {
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+      padding: var(--spacing-lg);
+      padding-bottom: calc(var(--spacing-lg) + var(--safe-bottom));
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .image-upload-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .image-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+    
+    .image-upload-item {
+      aspect-ratio: 1;
+      border: 2px dashed var(--outline);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface-container);
+      transition: all 0.3s ease;
+    }
+    
+    .image-upload-item:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    
+    .image-upload-item.add {
+      color: var(--outline);
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .image-remove:hover {
+      background: rgba(0,0,0,0.7);
+      transform: scale(1.1);
+    }
+    
+    .location-section {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .location-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--surface-container);
+      border-radius: var(--radius-sm);
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .location-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--outline);
+    }
+    
+    .team-selection {
+      margin-top: var(--spacing-md);
+    }
+    
+    .selected-team {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+    
+    .team-chip {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      animation: popIn 0.3s ease;
+    }
+    
+    @keyframes popIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .modal-header {
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--outline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-body {
+      padding: var(--spacing-lg);
+      overflow-y: auto;
+    }
+    
+    .modal-footer {
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--outline);
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .team-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--outline);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .team-checkbox-item:hover {
+      background: var(--surface-container);
+    }
+    
+    .team-checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+    
+    .btn {
+      transition: all 0.3s ease;
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .modal-content {
+        background: #2D2B30;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="app-title">New Activity</div>
+    <button class="icon-button" onclick="goBack()">
+      <span class="material-icons-round">close</span>
+    </button>
+  </div>
+  
+  <!-- Main Container -->
+  <div class="container">
+    <div class="form-card card">
+      <!-- Date of Activity -->
+      <div class="form-group">
+        <label class="form-label required">Date of Activity</label>
+        <input type="date" class="form-input" id="activityDate" required>
+      </div>
+      
+      <!-- Description of Activity -->
+      <div class="form-group">
+        <label class="form-label required">Description of Activity</label>
+        <textarea class="form-input" id="description" placeholder="Describe your activity in detail..." rows="4" required></textarea>
+        <small style="color: var(--outline);">Minimum 10 characters</small>
+      </div>
+      
+      <!-- Activity Images -->
+      <div class="image-upload-section">
+        <label class="form-label">Activity Images (Max 6)</label>
+        <div class="image-upload-grid" id="imageGrid">
+          <div class="image-upload-item add" onclick="openImageSource()">
+            <span class="material-icons-round">add_photo_alternate</span>
+            <span style="font-size: 12px;">Add Photo</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Location -->
+      <div class="location-section">
+        <label class="form-label">Location</label>
+        <button class="btn btn-secondary" onclick="getLocation()" type="button" style="width: 100%;">
+          <span class="material-icons-round">location_on</span>
+          Get Current Location
+        </button>
+        <div class="location-info" id="locationInfo" style="display: none;">
+          <span class="material-icons-round" style="color: var(--primary);">location_on</span>
+          <div class="location-text" id="locationText"></div>
+          <button class="icon-button" onclick="clearLocation()" title="Remove location">
+            <span class="material-icons-round">close</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Activity Team Member -->
+      <div class="form-group">
+        <label class="form-label">Activity Team Member</label>
+        <div class="team-selection">
+          <button class="btn btn-secondary" onclick="showTeamSelector()" type="button" style="width: 100%;">
+            <span class="material-icons-round">group_add</span>
+            Select Team Members
+          </button>
+        </div>
+        <div class="selected-team" id="selectedTeam"></div>
+      </div>
+      
+      <!-- Submitted By (readonly) -->
+      <div class="form-group">
+        <label class="form-label">Submitted By</label>
+        <input type="text" class="form-input" id="submittedByName" readonly>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button class="btn btn-secondary btn-full" onclick="cancelActivity()">Cancel</button>
+        <button class="btn btn-primary btn-full" onclick="saveActivity()">
+          <span class="material-icons-round">save</span>
+          Save Activity
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div id="loadingText">Saving activity...</div>
+  </div>
+  
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <script>
+    // App State
+    const state = {
+      images: [],
+      location: null,
+      currentUser: null,
+      selectedTeamMembers: [],
+      allTeamMembers: [],
+      editId: null
+    };
+    
+    // Initialize
+    async function init() {
+      // Get current user
+      const savedUser = localStorage.getItem('trackmaster_user');
+      const sessionUser = sessionStorage.getItem('trackmaster_session');
+      
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          if (Date.now() < (userData.expiry || 0)) {
+            state.currentUser = userData;
+          }
+        } catch (e) {}
+      } else if (sessionUser) {
+        try {
+          state.currentUser = JSON.parse(sessionUser);
+        } catch (e) {}
+      }
+      
+      if (!state.currentUser) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Set current user as default team member
+      state.selectedTeamMembers = [state.currentUser.staffId];
+      
+      // Set current date
+      document.getElementById('activityDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('submittedByName').value = state.currentUser.name;
+      
+      // Load team members
+      await loadTeamMembers();
+      
+      // Check if editing existing activity
+      const urlParams = new URLSearchParams(window.location.search);
+      state.editId = urlParams.get('edit');
+      if (state.editId) {
+        await loadActivityForEdit(state.editId);
+        document.querySelector('.app-title').textContent = 'Edit Activity';
+      }
+    }
+    
+    // Load team members
+    async function loadTeamMembers() {
+      try {
+        const result = await API.getTeamMembers();
+        if (result.success) {
+          state.allTeamMembers = result.members;
+        }
+      } catch (error) {
+        console.error('Error loading team members:', error);
+      }
+    }
+    
+    // Load activity for editing
+    async function loadActivityForEdit(rowId) {
+      try {
+        const result = await API.getUserActivities(state.currentUser.staffId, 'all');
+        if (result.success) {
+          const activity = result.activities.find(a => a.rowId === rowId);
+          if (activity) {
+            document.getElementById('activityDate').value = activity.date;
+            document.getElementById('description').value = activity.description;
+            
+            if (activity.location) {
+              state.location = activity.location;
+              document.getElementById('locationText').textContent = activity.location;
+              document.getElementById('locationInfo').style.display = 'flex';
+            }
+            
+            if (activity.images && activity.images.length > 0) {
+              state.images = activity.images;
+              renderImageGrid();
+            }
+            
+            if (activity.teamMembers && activity.teamMembers.length > 0) {
+              state.selectedTeamMembers = activity.teamMembers;
+              updateSelectedTeamDisplay();
+            }
+          }
+        }
+      } catch (error) {
+        showToast('Error loading activity', 'error');
+      }
+    }
+    
+    // Show team selector modal
+    function showTeamSelector() {
+      if (state.allTeamMembers.length === 0) {
+        showToast('No team members available', 'warning');
+        return;
+      }
+      
+      // Create modal
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.id = 'teamModal';
+      
+      let membersHtml = '';
+      state.allTeamMembers.forEach(member => {
+        membersHtml += `
+          <div class="team-checkbox-item" onclick="toggleMember('${member.staffId}')">
+            <input type="checkbox" 
+                   id="member_${member.staffId}" 
+                   value="${member.staffId}"
+                   ${state.selectedTeamMembers.includes(member.staffId) ? 'checked' : ''}>
+            <label for="member_${member.staffId}">
+              <strong>${escapeHtml(member.name)}</strong><br>
+              <small>${escapeHtml(member.designation || 'Team Member')}</small>
+            </label>
+          </div>
+        `;
+      });
+      
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Select Team Members</h3>
+            <button class="icon-button" onclick="closeTeamModal()">
+              <span class="material-icons-round">close</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            ${membersHtml}
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="confirmTeamSelection()">Done</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+    
+    // Toggle member selection
+    function toggleMember(staffId) {
+      const checkbox = document.getElementById(`member_${staffId}`);
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+      }
+    }
+    
+    // Close team modal
+    function closeTeamModal() {
+      const modal = document.getElementById('teamModal');
+      if (modal) modal.remove();
+    }
+    
+    // Confirm team selection
+    function confirmTeamSelection() {
+      const checkboxes = document.querySelectorAll('#teamModal input[type="checkbox"]:checked');
+      state.selectedTeamMembers = Array.from(checkboxes).map(cb => cb.value);
+      
+      updateSelectedTeamDisplay();
+      closeTeamModal();
+    }
+    
+    // Update selected team display
+    function updateSelectedTeamDisplay() {
+      const selectedDiv = document.getElementById('selectedTeam');
+      
+      if (state.selectedTeamMembers.length > 0) {
+        const selectedNames = state.allTeamMembers
+          .filter(m => state.selectedTeamMembers.includes(m.staffId))
+          .map(m => m.name);
+        
+        selectedDiv.innerHTML = selectedNames.map(name => `
+          <span class="team-chip">
+            <span class="material-icons-round" style="font-size: 16px;">person</span>
+            ${escapeHtml(name)}
+          </span>
+        `).join('');
+      } else {
+        selectedDiv.innerHTML = '';
+      }
+    }
+    
+    // Open image source
+    function openImageSource() {
+      if (state.images.length >= 6) {
+        showToast('Maximum 6 images allowed', 'warning');
+        return;
+      }
+      
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      
+      input.onchange = (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+          if (state.images.length >= 6) return;
+          
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            addImage(event.target.result);
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+      
+      input.click();
+    }
+    
+    // Add image
+    function addImage(imageData) {
+      if (state.images.length >= 6) return;
+      state.images.push(imageData);
+      renderImageGrid();
+    }
+    
+    // Remove image
+    function removeImage(index) {
+      state.images.splice(index, 1);
+      renderImageGrid();
+    }
+    
+    // Render image grid
+    function renderImageGrid() {
+      const grid = document.getElementById('imageGrid');
+      let html = '';
+      
+      state.images.forEach((img, index) => {
+        html += `
+          <div class="image-upload-item">
+            <img src="${img}" class="image-preview" alt="Preview ${index + 1}">
+            <button class="image-remove" onclick="removeImage(${index})">
+              <span class="material-icons-round" style="font-size: 16px;">close</span>
+            </button>
+          </div>
+        `;
+      });
+      
+      if (state.images.length < 6) {
+        html += `
+          <div class="image-upload-item add" onclick="openImageSource()">
+            <span class="material-icons-round">add_photo_alternate</span>
+            <span style="font-size: 12px;">Add Photo</span>
+          </div>
+        `;
+      }
+      
+      grid.innerHTML = html;
+    }
+    
+    // Get location
+    function getLocation() {
+      if (!navigator.geolocation) {
+        showToast('Geolocation not supported', 'error');
+        return;
+      }
+      
+      showToast('Getting location...', 'info');
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          state.location = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
+          document.getElementById('locationText').textContent = 
+            `Lat: ${position.coords.latitude.toFixed(6)}, Lng: ${position.coords.longitude.toFixed(6)}`;
+          document.getElementById('locationInfo').style.display = 'flex';
+          showToast('Location captured', 'success');
+        },
+        (error) => {
+          let message = 'Could not get location';
+          if (error.code === 1) message = 'Location permission denied';
+          else if (error.code === 2) message = 'Location unavailable';
+          else if (error.code === 3) message = 'Location request timeout';
+          
+          showToast(message, 'error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+    
+    // Clear location
+    function clearLocation() {
+      state.location = null;
+      document.getElementById('locationInfo').style.display = 'none';
+    }
+    
+    // Save activity
+    async function saveActivity() {
+      // Validate form
+      const date = document.getElementById('activityDate').value;
+      const description = document.getElementById('description').value.trim();
+      
+      if (!date) {
+        showToast('Please select date', 'error');
+        return;
+      }
+      
+      if (!description) {
+        showToast('Please enter description', 'error');
+        return;
+      }
+      
+      if (description.length < 10) {
+        showToast('Description must be at least 10 characters', 'error');
+        return;
+      }
+      
+      const activityData = {
+        rowId: state.editId,
+        date: date,
+        description: description,
+        images: state.images,
+        location: state.location,
+        teamMembers: state.selectedTeamMembers,
+        submittedBy: state.currentUser.staffId
+      };
+      
+      document.getElementById('loading').style.display = 'flex';
+      
+      try {
+        let result;
+        
+        if (state.editId) {
+          result = await API.updateActivity(state.editId, activityData);
+        } else {
+          result = await API.saveActivity(activityData);
+        }
+        
+        document.getElementById('loading').style.display = 'none';
+        
+        if (result.success) {
+          showToast(state.editId ? 'Activity updated!' : 'Activity saved!', 'success');
+          
+          // Clear cache
+          if (window.opener && window.opener.API) {
+            window.opener.API.cache.clear();
+          }
+          
+          setTimeout(() => {
+            window.location.href = 'index.html?refresh=true';
+          }, 1500);
+        } else {
+          showToast(result.message || 'Error saving activity', 'error');
+        }
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        
+        // Save offline
+        if (!navigator.onLine) {
+          const offlineActivities = JSON.parse(localStorage.getItem('offlineActivities') || '[]');
+          offlineActivities.push(activityData);
+          localStorage.setItem('offlineActivities', JSON.stringify(offlineActivities));
+          showToast('Saved offline. Will sync when online.', 'warning');
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        } else {
+          showToast('Error saving activity', 'error');
+        }
+      }
+    }
+    
+    // Cancel
+    function cancelActivity() {
+      if (confirm('Discard changes?')) {
+        window.location.href = 'index.html';
+      }
+    }
+    
+    // Go back
+    function goBack() {
+      cancelActivity();
+    }
+    
+    // Escape HTML
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
+    // Show toast
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // Initialize on load
+    window.onload = init;
+  </script>
+</body>
+</html>

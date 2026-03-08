@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6750A4">
+  
+  <!-- Performance Optimizations -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="dns-prefetch" href="https://script.google.com">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  
+  <title>TrackMaster</title>
+</head>
+<body>
+  <div id="app">
+    <div class="app-shell">
+      <!-- App Bar -->
+      <div class="app-bar">
+        <div class="app-bar-content">
+          <div class="app-title">TrackMaster</div>
+        </div>
+        <div class="app-actions">
+          <button class="icon-button" onclick="refreshData()" title="Refresh">
+            <span class="material-icons-round">refresh</span>
+          </button>
+          <button class="icon-button" onclick="showNotifications()" title="Notifications">
+            <span class="material-icons-round">notifications</span>
+          </button>
+          <button class="icon-button" onclick="logout()" title="Logout">
+            <span class="material-icons-round">logout</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Offline Indicator -->
+      <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+        <span class="material-icons-round">cloud_off</span>
+        You're offline - Changes will sync when online
+      </div>
+      
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="page-container">
+          <div class="page" id="currentPage"></div>
+        </div>
+      </div>
+      
+      <!-- Floating Action Button -->
+      <button class="fab" onclick="window.location.href='newactivity.html'" title="New Activity">
+        <span class="material-icons-round">add</span>
+      </button>
+      
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <a href="#" class="nav-item" onclick="navigateTo('home')">
+          <span class="material-icons-round nav-icon">home</span>
+          <span class="nav-label">Home</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('myactivity')">
+          <span class="material-icons-round nav-icon">list_alt</span>
+          <span class="nav-label">Activity</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('myteam')">
+          <span class="material-icons-round nav-icon">groups</span>
+          <span class="nav-label">Team</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('reports')">
+          <span class="material-icons-round nav-icon">download</span>
+          <span class="nav-label">Reports</span>
+        </a>
+        <a href="#" class="nav-item" onclick="navigateTo('more')">
+          <span class="material-icons-round nav-icon">more_horiz</span>
+          <span class="nav-label">More</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading">
+      <div class="spinner"></div>
+      <div id="loadingText">Loading...</div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+  
+  <!-- API Script -->
+  <script src="api.js"></script>
+  
+  <script>
+    // App State with caching
+    const appState = {
+      currentUser: null,
+      isOnline: navigator.onLine,
+      currentPage: 'home',
+      reportType: 'weekly',
+      format: 'csv',
+      previewData: null,
+      recentReports: JSON.parse(localStorage.getItem('recentReports') || '[]'),
+      offlineActivities: JSON.parse(localStorage.getItem('offlineActivities') || '[]')
+    };
+    
+    // Page Cache for faster navigation
+    const pageCache = new Map();
+    
+    // Check authentication
+    function checkAuth() {
+      const savedUser = localStorage.getItem('trackmaster_user');
+      const sessionUser = sessionStorage.getItem('trackmaster_session');
+      
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          if (Date.now() < (userData.expiry || 0)) {
+            appState.currentUser = userData;
+            return true;
+          }
+        } catch (e) {}
+      } else if (sessionUser) {
+        try {
+          appState.currentUser = JSON.parse(sessionUser);
+          return true;
+        } catch (e) {}
+      }
+      
+      window.location.href = 'login.html';
+      return false;
+    }
+    
+    // Initialize App
+    async function initApp() {
+      if (!checkAuth()) return;
+      
+      setupEventListeners();
+      registerServiceWorker();
+      
+      // Show cached page immediately if available
+      const cached = pageCache.get('home');
+      if (cached) {
+        document.getElementById('currentPage').innerHTML = cached;
+      }
+      
+      // Load fresh data in background
+      setTimeout(() => loadPage('home'), 100);
+    }
+    
+    // Register Service Worker
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('ServiceWorker registration failed:', err);
+        });
+      }
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      window.addEventListener('online', () => {
+        appState.isOnline = true;
+        document.getElementById('offlineIndicator').style.display = 'none';
+        showToast('You are back online!', 'success');
+        syncOfflineActivities();
+      });
+      
+      window.addEventListener('offline', () => {
+        appState.isOnline = false;
+        document.getElementById('offlineIndicator').style.display = 'flex';
+        showToast('You are offline', 'warning');
+      });
+      
+      window.addEventListener('popstate', (e) => {
+        const page = e.state?.page || 'home';
+        navigateTo(page, false);
+      });
+    }
+    
+    // Sync offline activities
+    async function syncOfflineActivities() {
+      if (appState.offlineActivities.length > 0) {
+        showToast('Syncing offline activities...', 'info');
+        
+        for (const activity of appState.offlineActivities) {
+          try {
+            const result = await API.saveActivity(activity);
+            if (result.success) {
+              appState.offlineActivities = appState.offlineActivities.filter(a => a !== activity);
+              localStorage.setItem('offlineActivities', JSON.stringify(appState.offlineActivities));
+            }
+          } catch (error) {
+            console.error('Sync failed:', error);
+          }
+        }
+        
+        showToast('Sync completed!', 'success');
+      }
+    }
+    
+    // Navigation
+    async function navigateTo(page, addToHistory = true) {
+      appState.currentPage = page;
+      
+      // Update active nav item
+      const navMap = { home: 0, myactivity: 1, myteam: 2, reports: 3, more: 4 };
+      document.querySelectorAll('.nav-item').forEach((item, index) => {
+        item.classList.toggle('active', index === navMap[page]);
+      });
+      
+      if (addToHistory) {
+        history.pushState({ page }, '', `#${page}`);
+      }
+      
+      // Show cached page immediately
+      const cached = pageCache.get(page);
+      if (cached) {
+        document.getElementById('currentPage').innerHTML = cached;
+      }
+      
+      // Load fresh data
+      await loadPage(page);
+    }
+    
+    // Load page content
+    async function loadPage(page) {
+      const container = document.getElementById('currentPage');
+      
+      // Show loading only if no cache
+      if (!pageCache.has(page)) {
+        document.getElementById('loading').style.display = 'flex';
+      }
+      
+      try {
+        let html = '';
+        
+        switch(page) {
+          case 'home':
+            html = await loadDashboard();
+            break;
+          case 'myactivity':
+            html = await loadMyActivity();
+            break;
+          case 'myteam':
+            html = await loadMyTeam();
+            break;
+          case 'reports':
+            html = loadReports();
+            break;
+          case 'more':
+            html = loadMore();
+            break;
+        }
+        
+        // Cache the page content
+        pageCache.set(page, html);
+        container.innerHTML = html;
+        
+        // Setup lazy loading for images
+        setupLazyLoading();
+        
+      } catch (error) {
+        console.error('Error loading page:', error);
+        if (!pageCache.has(page)) {
+          container.innerHTML = '<div class="card">Error loading content. <button onclick="retryLoad()">Retry</button></div>';
+        }
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    
+    // Retry loading
+    function retryLoad() {
+      loadPage(appState.currentPage);
+    }
+    
+    // Setup lazy loading for images
+    function setupLazyLoading() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            }
+            observer.unobserve(img);
+          }
+        });
+      });
+      
+      document.querySelectorAll('img[data-src]').forEach(img => observer.observe(img));
+    }
+    
+    // Load Dashboard
+    async function loadDashboard() {
+      if (!appState.currentUser) return '<div class="card">Please login</div>';
+      
+      try {
+        const result = await API.getDashboardStats(appState.currentUser.staffId);
+        
+        if (result.success) {
+          const stats = result.stats;
+          const recentActivities = result.activities?.slice(0, 5) || [];
+          
+          return `
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <span class="material-icons-round">dashboard</span>
+                  Welcome, ${escapeHtml(appState.currentUser.name)}
+                </h3>
+              </div>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value">${stats.weekly}</div>
+                  <div class="stat-label">This Week</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${stats.monthly}</div>
+                  <div class="stat-label">This Month</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${stats.total}</div>
+                  <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">${stats.pending}</div>
+                  <div class="stat-label">Pending</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <span class="material-icons-round">pie_chart</span>
+                  Activity Breakdown
+                </h3>
+              </div>
+              <div class="stats-grid">
+                ${Object.entries(stats.typeBreakdown || {}).map(([type, count]) => `
+                  <div class="stat-card">
+                    <div class="stat-value">${count}</div>
+                    <div class="stat-label">${type}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <span class="material-icons-round">history</span>
+                  Recent Activities
+                </h3>
+              </div>
+              <div class="activity-list">
+                ${recentActivities.length > 0 ? recentActivities.map(a => `
+                  <div class="activity-item" onclick="editActivity('${a.rowId}')">
+                    <div class="activity-header">
+                      <span class="activity-date">${formatDate(a.date)}</span>
+                      <span class="activity-day">${a.status}</span>
+                    </div>
+                    <div class="activity-description">${escapeHtml(a.description)}</div>
+                  </div>
+                `).join('') : '<div style="padding: 20px; text-align: center;">No recent activities</div>'}
+              </div>
+            </div>
+          `;
+        }
+        return '<div class="card">Error loading dashboard</div>';
+      } catch (error) {
+        return '<div class="card">Error loading dashboard</div>';
+      }
+    }
+    
+    // Load My Activity
+    async function loadMyActivity() {
+      if (!appState.currentUser) return '<div class="card">Please login</div>';
+      
+      try {
+        const result = await API.getUserActivities(appState.currentUser.staffId, 'all');
+        
+        if (result.success && result.activities.length > 0) {
+          // Group activities by month
+          const grouped = {};
+          result.activities.forEach(activity => {
+            const date = new Date(activity.date);
+            const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            if (!grouped[monthYear]) grouped[monthYear] = [];
+            grouped[monthYear].push(activity);
+          });
+          
+          let html = `
+            <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;">
+              <button class="filter-chip active" onclick="filterActivities('all')">All</button>
+              <button class="filter-chip" onclick="filterActivities('weekly')">This Week</button>
+              <button class="filter-chip" onclick="filterActivities('monthly')">This Month</button>
+            </div>
+          `;
+          
+          Object.entries(grouped).forEach(([month, activities]) => {
+            html += `
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">${month}</h3>
+                  <span class="badge">${activities.length} activities</span>
+                </div>
+                <div class="activity-list">
+                  ${activities.map(a => `
+                    <div class="activity-item ${a.status === 'Pending Approval' ? 'pending' : ''}" onclick="editActivity('${a.rowId}')">
+                      <div class="activity-header">
+                        <span class="activity-date">${a.date}</span>
+                        <span class="activity-day" style="color: ${a.status === 'Approved' ? 'var(--success)' : 'var(--warning)'}">
+                          ${a.status}
+                        </span>
+                      </div>
+                      <div class="activity-description">${escapeHtml(a.description)}</div>
+                      <div class="activity-meta">
+                        ${a.location ? `
+                          <span class="activity-meta-item">
+                            <span class="material-icons-round">location_on</span>
+                            ${a.location}
+                          </span>
+                        ` : ''}
+                        <span class="activity-meta-item">
+                          <span class="material-icons-round">groups</span>
+                          ${a.teamMembers.length} member(s)
+                        </span>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          });
+          
+          return html;
+        }
+        
+        return `
+          <div class="card">
+            <div style="text-align: center; padding: 40px 20px;">
+              <span class="material-icons-round" style="font-size: 48px; color: var(--outline);">assignment</span>
+              <h3>No Activities Found</h3>
+              <p style="color: var(--outline); margin: 20px 0;">Start by adding your first activity</p>
+              <button class="btn btn-primary" onclick="window.location.href='newactivity.html'">
+                <span class="material-icons-round">add</span>
+                Add New Activity
+              </button>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        return '<div class="card">Error loading activities</div>';
+      }
+    }
+    
+    // Load My Team
+    async function loadMyTeam() {
+      try {
+        const result = await API.getTeamMembers();
+        
+        if (result.success) {
+          return `
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <span class="material-icons-round">groups</span>
+                  Team Members (${result.members.length})
+                </h3>
+              </div>
+              <div class="team-grid">
+                ${result.members.map(member => `
+                  <div class="team-member" onclick="viewMemberProfile('${member.staffId}')">
+                    <div class="member-header">
+                      <div class="member-avatar" style="background: ${getAvatarColor(member.staffId)}">
+                        ${getInitials(member.name)}
+                      </div>
+                      <div class="member-info">
+                        <h4>${escapeHtml(member.name || 'Unknown')}</h4>
+                        <div class="member-role">${escapeHtml(member.designation || 'Team Member')}</div>
+                      </div>
+                    </div>
+                    <div class="member-id">${escapeHtml(member.staffId || 'N/A')}</div>
+                    <div class="member-contact">${escapeHtml(member.contactNo || 'No contact')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        return '<div class="card">Error loading team</div>';
+      } catch (error) {
+        return '<div class="card">Error loading team</div>';
+      }
+    }
+    
+    // Load Reports (Old style)
+    function loadReports() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">assessment</span>
+              Generate Report
+            </h3>
+          </div>
+          
+          <div class="report-types">
+            <div class="report-type-card ${appState.reportType === 'weekly' ? 'selected' : ''}" onclick="selectReportType('weekly')">
+              <div class="report-icon">
+                <span class="material-icons-round">date_range</span>
+              </div>
+              <div>Weekly Report</div>
+            </div>
+            <div class="report-type-card ${appState.reportType === 'monthly' ? 'selected' : ''}" onclick="selectReportType('monthly')">
+              <div class="report-icon">
+                <span class="material-icons-round">calendar_month</span>
+              </div>
+              <div>Monthly Report</div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Download Format</label>
+            <div class="format-options">
+              <div class="format-option ${appState.format === 'pdf' ? 'selected' : ''}" onclick="selectFormat('pdf')">
+                <span class="material-icons-round">picture_as_pdf</span>
+                <div>PDF</div>
+              </div>
+              <div class="format-option ${appState.format === 'csv' ? 'selected' : ''}" onclick="selectFormat('csv')">
+                <span class="material-icons-round">table_chart</span>
+                <div>CSV</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="btn btn-primary btn-full" onclick="generateReport()">
+            <span class="material-icons-round">download</span>
+            Generate Report
+          </button>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">history</span>
+              Recent Reports
+            </h3>
+          </div>
+          <div class="activity-list">
+            ${appState.recentReports.length > 0 ? appState.recentReports.map(report => `
+              <div class="activity-item" onclick="downloadReport('${report.id}')">
+                <div class="activity-header">
+                  <span class="activity-date">${report.date}</span>
+                  <span class="activity-day">${report.type}</span>
+                </div>
+                <div class="activity-description">${report.name}</div>
+              </div>
+            `).join('') : `
+              <div style="padding: 20px; text-align: center; color: var(--outline);">
+                No reports generated yet
+              </div>
+            `}
+          </div>
+        </div>
+        
+        <div id="reportPreview" style="display: none;"></div>
+      `;
+    }
+    
+    // Load More Tab (Old style)
+    function loadMore() {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">person</span>
+              Profile
+            </h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md);">
+            <div class="member-avatar" style="width: 64px; height: 64px; font-size: 24px; background: var(--primary);">
+              ${getInitials(appState.currentUser?.name)}
+            </div>
+            <div>
+              <h4>${escapeHtml(appState.currentUser?.name || 'User')}</h4>
+              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.staffId || '')}</div>
+              <div style="color: var(--outline);">${escapeHtml(appState.currentUser?.designation || '')}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="more-menu">
+          <div class="more-item" onclick="showSettings()">
+            <div class="more-icon">
+              <span class="material-icons-round">settings</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Settings</div>
+              <div class="more-subtitle">App preferences and settings</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="showHelp()">
+            <div class="more-icon">
+              <span class="material-icons-round">help</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Help & Support</div>
+              <div class="more-subtitle">FAQs and contact support</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="showAbout()">
+            <div class="more-icon">
+              <span class="material-icons-round">info</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">About</div>
+              <div class="more-subtitle">Version 1.0.0</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="privacyPolicy()">
+            <div class="more-icon">
+              <span class="material-icons-round">privacy_tip</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Privacy Policy</div>
+              <div class="more-subtitle">Read our privacy policy</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+          
+          <div class="more-item" onclick="termsOfUse()">
+            <div class="more-icon">
+              <span class="material-icons-round">description</span>
+            </div>
+            <div class="more-content">
+              <div class="more-title">Terms of Use</div>
+              <div class="more-subtitle">Terms and conditions</div>
+            </div>
+            <span class="material-icons-round" style="color: var(--outline);">chevron_right</span>
+          </div>
+        </div>
+        
+        <div class="card" style="margin-top: var(--spacing-lg);">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span class="material-icons-round">storage</span>
+              Storage
+            </h3>
+          </div>
+          <div style="padding: var(--spacing-md);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span>Offline Activities</span>
+              <span>${appState.offlineActivities.length} pending</span>
+            </div>
+            <div style="height: 8px; background: var(--surface-container); border-radius: 4px; overflow: hidden;">
+              <div style="width: ${Math.min(100, appState.offlineActivities.length * 10)}%; height: 100%; background: var(--primary);"></div>
+            </div>
+            <button class="btn btn-secondary btn-full" style="margin-top: 15px;" onclick="clearOfflineData()">
+              <span class="material-icons-round">delete_sweep</span>
+              Clear Offline Data
+            </button>
+          </div>
+        </div>
+        
+        <div class="version-info">
+          TrackMaster v1.0.0<br>
+          © 2026 All rights reserved
+        </div>
+      `;
+    }
+    
+    // Filter activities
+    async function filterActivities(filter) {
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      document.getElementById('loading').style.display = 'flex';
+      
+      try {
+        const result = await API.getUserActivities(appState.currentUser.staffId, filter);
+        document.getElementById('loading').style.display = 'none';
+        
+        if (result.success) {
+          pageCache.delete('myactivity');
+          await loadPage('myactivity');
+        }
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        showToast('Error filtering activities', 'error');
+      }
+    }
+    
+    // Select report type
+    function selectReportType(type) {
+      appState.reportType = type;
+      loadPage('reports');
+    }
+    
+    // Select format
+    function selectFormat(format) {
+      appState.format = format;
+      loadPage('reports');
+    }
+    
+    // Generate report
+    async function generateReport() {
+      if (!appState.currentUser) return;
+      
+      document.getElementById('loading').style.display = 'flex';
+      
+      try {
+        const result = await API.generateReport(
+          appState.currentUser.staffId,
+          appState.reportType,
+          appState.format,
+          new Date().getMonth(),
+          new Date().getFullYear()
+        );
+        
+        document.getElementById('loading').style.display = 'none';
+        
+        if (result.success) {
+          if (appState.format === 'csv' && result.data) {
+            // Download CSV
+            const blob = new Blob([result.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = result.filename || `report_${appState.reportType}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            // Add to recent reports
+            const report = {
+              id: Date.now(),
+              name: `${appState.reportType.charAt(0).toUpperCase() + appState.reportType.slice(1)} Report`,
+              date: new Date().toLocaleDateString(),
+              type: appState.reportType
+            };
+            appState.recentReports.unshift(report);
+            if (appState.recentReports.length > 5) appState.recentReports.pop();
+            localStorage.setItem('recentReports', JSON.stringify(appState.recentReports));
+            
+            showToast('Report downloaded successfully!', 'success');
+          } else if (result.activities) {
+            // Show preview
+            showReportPreview(result.activities);
+          }
+        } else {
+          showToast(result.message || 'Error generating report', 'error');
+        }
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        showToast('Error generating report', 'error');
+      }
+    }
+    
+    // Show report preview
+    function showReportPreview(activities) {
+      const previewDiv = document.getElementById('reportPreview');
+      
+      if (activities.length === 0) {
+        previewDiv.innerHTML = `
+          <div class="card">
+            <p style="text-align: center; color: var(--outline);">No activities found for this period</p>
+          </div>
+        `;
+      } else {
+        previewDiv.innerHTML = `
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Report Preview (${activities.length} activities)</h3>
+              <button class="icon-button" onclick="closePreview()">
+                <span class="material-icons-round">close</span>
+              </button>
+            </div>
+            <div class="report-preview" style="max-height: 400px; overflow-y: auto;">
+              <table class="preview-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: var(--primary); color: white;">
+                    <th style="padding: 10px; text-align: left;">Date</th>
+                    <th style="padding: 10px; text-align: left;">Description</th>
+                    <th style="padding: 10px; text-align: left;">Location</th>
+                    <th style="padding: 10px; text-align: left;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${activities.map(a => `
+                    <tr style="border-bottom: 1px solid var(--outline);">
+                      <td style="padding: 10px;">${a.date}</td>
+                      <td style="padding: 10px;">${escapeHtml(a.description.substring(0, 30))}${a.description.length > 30 ? '...' : ''}</td>
+                      <td style="padding: 10px;">${a.location || 'N/A'}</td>
+                      <td style="padding: 10px;">${a.status}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+      
+      previewDiv.style.display = 'block';
+    }
+    
+    // Close preview
+    function closePreview() {
+      document.getElementById('reportPreview').style.display = 'none';
+    }
+    
+    // Helper functions
+    function getInitials(name) {
+      if (!name) return 'U';
+      return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    }
+    
+    function getAvatarColor(id) {
+      const colors = ['#6750A4', '#0D904F', '#DC3545', '#FFC107', '#17A2B8'];
+      const index = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+      return colors[index];
+    }
+    
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
+    // Edit activity
+    function editActivity(rowId) {
+      sessionStorage.setItem('editActivityId', rowId);
+      window.location.href = 'newactivity.html?edit=' + rowId;
+    }
+    
+    // View member profile
+    function viewMemberProfile(staffId) {
+      showToast('Viewing profile: ' + staffId, 'info');
+    }
+    
+    // Show notifications
+    function showNotifications() {
+      showToast('No new notifications', 'info');
+    }
+    
+    // Show settings
+    function showSettings() {
+      showToast('Settings coming soon', 'info');
+    }
+    
+    // Show help
+    function showHelp() {
+      showToast('Help & Support', 'info');
+    }
+    
+    // Show about
+    function showAbout() {
+      showToast('TrackMaster v1.0.0', 'info');
+    }
+    
+    // Privacy policy
+    function privacyPolicy() {
+      showToast('Privacy policy', 'info');
+    }
+    
+    // Terms of use
+    function termsOfUse() {
+      showToast('Terms of use', 'info');
+    }
+    
+    // Clear offline data
+    function clearOfflineData() {
+      if (confirm('Clear all offline data?')) {
+        appState.offlineActivities = [];
+        localStorage.removeItem('offlineActivities');
+        loadPage('more');
+        showToast('Offline data cleared', 'success');
+      }
+    }
+    
+    // Refresh data
+    function refreshData() {
+      pageCache.clear();
+      API.cache.clear();
+      loadPage(appState.currentPage);
+      showToast('Data refreshed', 'success');
+    }
+    
+    // Logout
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('trackmaster_user');
+        sessionStorage.removeItem('trackmaster_session');
+        pageCache.clear();
+        API.cache.clear();
+        window.location.href = 'login.html';
+      }
+    }
+    
+    // Show toast
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toast.setAttribute('role', 'alert');
+      
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // Initialize on load
+    window.onload = initApp;
+  </script>
+</body>
+</html>

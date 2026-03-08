@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750A4">
+  <title>Offline - TrackMaster</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #6750A4;
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .offline-container {
+      max-width: 400px;
+    }
+    
+    .icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      background: rgba(255,255,255,0.2);
+      width: 120px;
+      height: 120px;
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    
+    h1 {
+      margin-bottom: 16px;
+      font-size: 28px;
+    }
+    
+    p {
+      margin-bottom: 24px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    .retry-btn {
+      background: white;
+      color: #6750A4;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+    
+    .retry-btn:active {
+      transform: translateY(0);
+    }
+    
+    .offline-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    .secondary-btn {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255,255,255,0.5);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .secondary-btn:hover {
+      border-color: white;
+    }
+    
+    .status {
+      margin-top: 30px;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1D1B20;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-.5-13v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="white"/>
+      </svg>
+    </div>
+    
+    <h1>You're Offline</h1>
+    
+    <p>Don't worry! You can still use TrackMaster. Your activities will be saved and synced when you're back online.</p>
+    
+    <button class="retry-btn" onclick="retryConnection()">
+      Try Again
+    </button>
+    
+    <div class="offline-actions">
+      <button class="secondary-btn" onclick="goToLogin()">
+        Go to Login
+      </button>
+      
+      <button class="secondary-btn" onclick="viewCached()">
+        View Saved
+      </button>
+    </div>
+    
+    <div class="status" id="status">
+      Checking connection...
+    </div>
+  </div>
+  
+  <script>
+    function retryConnection() {
+      document.getElementById('status').textContent = 'Attempting to reconnect...';
+      
+      if (navigator.onLine) {
+        window.location.href = 'index.html';
+      } else {
+        setTimeout(() => {
+          document.getElementById('status').textContent = 'Still offline. Please check your connection.';
+        }, 2000);
+      }
+    }
+    
+    function goToLogin() {
+      window.location.href = 'login.html';
+    }
+    
+    function viewCached() {
+      // Try to load from cache
+      if ('caches' in window) {
+        caches.match('/index.html').then(response => {
+          if (response) {
+            window.location.href = 'index.html';
+          } else {
+            alert('No cached version found. Please go to login.');
+            window.location.href = 'login.html';
+          }
+        });
+      } else {
+        window.location.href = 'login.html';
+      }
+    }
+    
+    // Check connection periodically
+    setInterval(() => {
+      if (navigator.onLine) {
+        document.getElementById('status').textContent = 'Connection restored! Redirecting...';
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      } else {
+        document.getElementById('status').textContent = 'You are offline';
+      }
+    }, 3000);
+    
+    // Initial status
+    document.getElementById('status').textContent = navigator.onLine ? 'Online' : 'Offline';
+  </script>
+</body>
+</html>
