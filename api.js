@@ -1,12 +1,10 @@
-// api.js - Complete optimized version with caching and offline support
+// api.js - Optimized with request deduplication and caching
 const API = {
-  // Base URL - REPLACE WITH YOUR ACTUAL URL
-  baseUrl: 'https://script.google.com/macros/s/AKfycbz0A2K6Ln3QOioK3MDoXdue5sx0EE2dTyCHoDof-1wlS2Mwfonb5R3I7yNQqPylNQy0EA/exec',
+  baseUrl: 'https://script.google.com/macros/s/AKfycby9mZGt2G9CI9HZqel8YTmExiR2HWqDb2iEk7McgYYp5Iz2eWXkrcZFhNAPdu9HQtHE/exec',
   
-  // Cache system
+  // Memory cache
   cache: {
     data: {},
-    
     get(key) {
       const item = this.data[key];
       if (item && Date.now() < item.expiry) {
@@ -15,44 +13,53 @@ const API = {
       delete this.data[key];
       return null;
     },
-    
-    set(key, value, ttl = 300000) { // 5 minutes default
+    set(key, value, ttl = 300000) {
       this.data[key] = {
         value,
         expiry: Date.now() + ttl
       };
     },
-    
-    remove(key) {
-      delete this.data[key];
-    },
-    
     clear() {
       this.data = {};
-    },
-    
-    clearPrefix(prefix) {
-      Object.keys(this.data).forEach(key => {
-        if (key.startsWith(prefix)) {
-          delete this.data[key];
-        }
-      });
     }
   },
   
-  // Pending requests cache to prevent duplicates
-  pendingRequests: {},
+  // Request deduplication
+  pendingRequests: new Map(),
   
-  // Generate unique callback name for JSONP
   generateCallback() {
     return 'jsonp_callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   },
   
-  // JSONP request with timeout
-  jsonp(url, callbackName, timeout = 15000) {
-    return new Promise((resolve, reject) => {
+  async request(action, params = {}, options = {}) {
+    const cacheKey = action + '_' + JSON.stringify(params);
+    const { skipCache = false, cacheTTL = 300000, timeout = 15000 } = options;
+    
+    // Check cache
+    if (!skipCache) {
+      const cached = this.cache.get(cacheKey);
+      if (cached) return cached;
+    }
+    
+    // Deduplicate in-flight requests
+    if (this.pendingRequests.has(cacheKey)) {
+      return this.pendingRequests.get(cacheKey);
+    }
+    
+    const callbackName = this.generateCallback();
+    let url = this.baseUrl + '?action=' + encodeURIComponent(action);
+    url += '&callback=' + callbackName;
+    
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        const value = typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key];
+        url += '&' + key + '=' + encodeURIComponent(value);
+      }
+    });
+    
+    const promise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = url + '&callback=' + callbackName;
+      script.src = url;
       script.async = true;
       
       const timeoutId = setTimeout(() => {
@@ -62,16 +69,16 @@ const API = {
       
       const cleanup = () => {
         clearTimeout(timeoutId);
-        if (window[callbackName]) {
-          delete window[callbackName];
-        }
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
+        if (window[callbackName]) delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+        this.pendingRequests.delete(cacheKey);
       };
       
       window[callbackName] = (data) => {
         cleanup();
+        if (data && data.success && !skipCache) {
+          this.cache.set(cacheKey, data, cacheTTL);
+        }
         resolve(data);
       };
       
@@ -82,171 +89,39 @@ const API = {
       
       document.body.appendChild(script);
     });
+    
+    this.pendingRequests.set(cacheKey, promise);
+    return promise;
   },
   
-  // Main request handler
-  async request(action, params = {}, options = {}) {
-    const { skipCache = false, cacheTTL = 300000, timeout = 15000 } = options;
-    const cacheKey = action + '_' + JSON.stringify(params);
-    
-    // Return cached data if available
-    if (!skipCache) {
-      const cached = this.cache.get(cacheKey);
-      if (cached) {
-        console.log('Cache hit:', cacheKey);
-        return cached;
-      }
-    }
-    
-    // Prevent duplicate requests
-    if (this.pendingRequests[cacheKey]) {
-      console.log('Deduplicating request:', cacheKey);
-      return this.pendingRequests[cacheKey];
-    }
-    
-    // Build URL
-    const callbackName = this.generateCallback();
-    let url = this.baseUrl + '?action=' + encodeURIComponent(action);
-    
-    Object.keys(params).forEach(key => {
-      const value = params[key];
-      if (value !== undefined && value !== null) {
-        if (typeof value === 'object') {
-          url += '&' + key + '=' + encodeURIComponent(JSON.stringify(value));
-        } else {
-          url += '&' + key + '=' + encodeURIComponent(value);
-        }
-      }
-    });
-    
-    console.log('API Request:', action, params);
-    
-    // Create request promise
-    const requestPromise = this.jsonp(url, callbackName, timeout)
-      .then(data => {
-        delete this.pendingRequests[cacheKey];
-        
-        // Cache successful responses
-        if (data && data.success && !skipCache) {
-          this.cache.set(cacheKey, data, cacheTTL);
-        }
-        
-        return data;
-      })
-      .catch(error => {
-        delete this.pendingRequests[cacheKey];
-        console.error('API Error:', error);
-        return { success: false, message: error.message };
-      });
-    
-    this.pendingRequests[cacheKey] = requestPromise;
-    return requestPromise;
-  },
-  
-  // ============= PUBLIC METHODS =============
-  
-  // Login
+  // API Methods
   async login(username, password) {
-    return this.request('login', { username, password }, { 
-      skipCache: true,
-      timeout: 10000 
-    });
+    return this.request('login', { username, password }, { skipCache: true, timeout: 10000 });
   },
   
-  // Get team members
   async getTeamMembers() {
-    return this.request('getTeam', {}, { 
-      cacheTTL: 3600000 // 1 hour cache
-    });
+    return this.request('getTeam', {}, { cacheTTL: 3600000 }); // 1 hour
   },
   
-  // Save activity
   async saveActivity(activityData) {
-    // Clear relevant caches
-    if (activityData.submittedBy) {
-      this.cache.clearPrefix('getActivities_' + activityData.submittedBy);
-      this.cache.clearPrefix('getDashboard_' + activityData.submittedBy);
-    }
-    
-    return this.request('saveActivity', { 
-      data: JSON.stringify(activityData) 
-    }, { 
-      skipCache: true,
-      timeout: 20000 
-    });
+    this.cache.clear(); // Clear cache on write
+    return this.request('saveActivity', { data: JSON.stringify(activityData) }, { skipCache: true, timeout: 20000 });
   },
   
-  // Update activity
-  async updateActivity(rowId, updatedData) {
-    // Clear caches
-    if (updatedData.submittedBy) {
-      this.cache.clearPrefix('getActivities_' + updatedData.submittedBy);
-      this.cache.clearPrefix('getDashboard_' + updatedData.submittedBy);
-    }
-    
-    return this.request('updateActivity', { 
-      rowId, 
-      data: JSON.stringify(updatedData) 
-    }, { 
-      skipCache: true,
-      timeout: 20000 
-    });
-  },
-  
-  // Get user activities
   async getUserActivities(staffId, filter = 'all') {
-    if (!staffId) {
-      return { success: false, message: 'Staff ID required' };
-    }
-    
-    return this.request('getActivities', { staffId, filter }, { 
-      cacheTTL: 60000 // 1 minute cache
-    });
+    return this.request('getActivities', { staffId, filter }, { cacheTTL: 60000 }); // 1 minute
   },
   
-  // Get dashboard stats
   async getDashboardStats(staffId) {
-    if (!staffId) {
-      return { success: false, message: 'Staff ID required' };
-    }
-    
-    return this.request('getDashboard', { staffId }, { 
-      cacheTTL: 30000 // 30 seconds cache
-    });
+    return this.request('getDashboard', { staffId }, { cacheTTL: 30000 }); // 30 seconds
   },
   
-  // Generate report
-  async generateReport(staffId, reportType, format, month, year) {
-    if (!staffId) {
-      return { success: false, message: 'Staff ID required' };
-    }
-    
-    return this.request('generateReport', { 
-      staffId, 
-      reportType, 
-      format, 
-      month, 
-      year 
-    }, { 
-      cacheTTL: 300000, // 5 minutes cache
-      timeout: 30000 // 30 seconds timeout for report generation
-    });
-  },
-  
-  // Approve activity
-  async approveActivity(approvalId, staffId, action) {
-    return this.request('approveActivity', { 
-      approvalId, 
-      staffId, 
-      action 
-    }, { 
-      skipCache: true 
-    });
-  },
-  
-  // Clear all caches
-  clearCache() {
+  async updateActivity(rowId, updatedData) {
     this.cache.clear();
-    console.log('Cache cleared');
+    return this.request('updateActivity', { rowId, data: JSON.stringify(updatedData) }, { skipCache: true });
+  },
+  
+  async generateReport(staffId, reportType, format, startDate, endDate) {
+    return this.request('generateReport', { staffId, reportType, format, startDate, endDate }, { cacheTTL: 300000 }); // 5 minutes
   }
 };
