@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6750A4">
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  
   <style>
     .login-container {
       width: 100%;
@@ -21,7 +19,6 @@
       padding: var(--spacing-lg);
       background: var(--surface);
     }
-    
     .login-card {
       background: white;
       border-radius: var(--radius-lg);
@@ -31,7 +28,6 @@
       width: 100%;
       max-width: 400px;
     }
-    
     .app-logo {
       width: 80px;
       height: 80px;
@@ -44,32 +40,27 @@
       margin: 0 auto var(--spacing-xl);
       font-size: 32px;
     }
-    
     .app-title {
       font-size: 24px;
       font-weight: 700;
       color: var(--primary);
       margin-bottom: var(--spacing-sm);
     }
-    
     .app-subtitle {
       color: var(--outline);
       margin-bottom: var(--spacing-2xl);
       font-size: 14px;
     }
-    
     .form-group {
       margin-bottom: var(--spacing-xl);
       text-align: left;
     }
-    
     .form-label {
       display: block;
       margin-bottom: var(--spacing-sm);
       font-weight: 500;
       font-size: 14px;
     }
-    
     .form-input {
       width: 100%;
       padding: var(--spacing-lg);
@@ -80,13 +71,11 @@
       background: white;
       transition: border-color 0.2s;
     }
-    
     .form-input:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(103,80,164,0.1);
     }
-    
     .login-button {
       width: 100%;
       padding: var(--spacing-lg);
@@ -100,29 +89,22 @@
       margin: var(--spacing-lg) 0;
       transition: all 0.2s;
     }
-    
     .login-button:active {
       transform: scale(0.98);
       background: #5A4790;
     }
-    
     .error-message {
       color: var(--error);
       margin: var(--spacing-md) 0;
       font-size: 14px;
       display: none;
     }
-    
     @keyframes shake {
       0%,100%{transform:translateX(0)}
       10%,30%,50%,70%,90%{transform:translateX(-5px)}
       20%,40%,60%,80%{transform:translateX(5px)}
     }
-    
-    .shake {
-      animation: shake 0.5s;
-    }
-    
+    .shake { animation: shake 0.5s; }
     .loading-overlay {
       display: none;
       position: fixed;
@@ -137,7 +119,6 @@
       justify-content: center;
       color: white;
     }
-    
     .spinner {
       width: 48px;
       height: 48px;
@@ -147,11 +128,7 @@
       animation: spin 1s linear infinite;
       margin-bottom: 16px;
     }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
+    @keyframes spin { to { transform: rotate(360deg); } }
     .toast-container {
       position: fixed;
       bottom: 30px;
@@ -163,7 +140,6 @@
       align-items: center;
       pointer-events: none;
     }
-    
     .toast {
       background: var(--on-surface);
       color: white;
@@ -173,15 +149,12 @@
       animation: slideUp 0.3s ease;
       margin-bottom: 10px;
     }
-    
     .toast.success { background: var(--success); }
     .toast.error { background: var(--error); }
-    
     @keyframes slideUp {
       from { transform: translateY(100%); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    
     @media (prefers-color-scheme: dark) {
       .login-card { background: #2D2B30; }
       .form-input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: var(--on-surface); }
@@ -192,65 +165,41 @@
 <body>
   <div class="login-container">
     <div class="login-card">
-      <div class="app-logo">
-        <span class="material-icons-round">track_changes</span>
-      </div>
-      
+      <div class="app-logo"><span class="material-icons-round">track_changes</span></div>
       <h1 class="app-title">TrackMaster</h1>
       <p class="app-subtitle">Timesheet Management System</p>
-      
       <form onsubmit="return false;">
         <div class="form-group">
           <label class="form-label">Staff ID</label>
           <input type="text" class="form-input" id="username" placeholder="Enter your Staff ID" required autocomplete="username">
         </div>
-        
         <div class="form-group">
           <label class="form-label">Password</label>
           <input type="password" class="form-input" id="password" placeholder="Enter your password" required autocomplete="current-password">
         </div>
-        
         <div class="error-message" id="errorMessage"></div>
-        
         <button class="login-button" id="loginButton" onclick="login()">Login</button>
       </form>
     </div>
   </div>
-  
-  <div class="loading-overlay" id="loading">
-    <div class="spinner"></div>
-    <div>Logging in...</div>
-  </div>
-  
+  <div class="loading-overlay" id="loading"><div class="spinner"></div><div>Logging in...</div></div>
   <div class="toast-container" id="toastContainer"></div>
-  
   <script>
     async function login() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const loginButton = document.getElementById('loginButton');
       const errorElement = document.getElementById('errorMessage');
-      
-      if (!username || !password) {
-        showError('Please enter both fields');
-        return;
-      }
-      
+      if (!username || !password) { showError('Please enter both fields'); return; }
       loginButton.disabled = true;
       loginButton.textContent = 'Logging in...';
       document.getElementById('loading').style.display = 'flex';
       errorElement.style.display = 'none';
-      
       try {
         const result = await API.login(username, password);
-        
         if (result.success) {
-          const userData = {
-            ...result.user,
-            expiry: Date.now() + (7 * 24 * 60 * 60 * 1000)
-          };
+          const userData = { ...result.user, expiry: Date.now() + (7 * 24 * 60 * 60 * 1000) };
           localStorage.setItem('trackmaster_user', JSON.stringify(userData));
-          
           showToast('Login successful!', 'success');
           setTimeout(() => window.location.href = 'index.html', 1000);
         } else {
@@ -266,7 +215,6 @@
         document.getElementById('loading').style.display = 'none';
       }
     }
-    
     function showError(message) {
       const error = document.getElementById('errorMessage');
       error.textContent = message;
@@ -274,7 +222,6 @@
       error.classList.add('shake');
       setTimeout(() => error.classList.remove('shake'), 500);
     }
-    
     function showToast(message, type) {
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
@@ -282,20 +229,11 @@
       document.getElementById('toastContainer').appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
     }
-    
-    document.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') login();
-    });
-    
+    document.addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
     window.onload = () => {
       const savedUser = localStorage.getItem('trackmaster_user');
       if (savedUser) {
-        try {
-          const userData = JSON.parse(savedUser);
-          if (Date.now() < userData.expiry) {
-            window.location.href = 'index.html';
-          }
-        } catch (e) {}
+        try { const userData = JSON.parse(savedUser); if (Date.now() < userData.expiry) { window.location.href = 'index.html'; } } catch (e) {}
       }
       document.getElementById('username').focus();
     };
