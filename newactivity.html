@@ -4,271 +4,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6750A4">
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  
   <style>
-    .container {
-      height: calc(100vh - 64px);
-      overflow-y: auto;
-      padding: var(--spacing-lg);
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    .image-upload-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-sm);
-      margin-top: var(--spacing-md);
-    }
-    
-    .image-upload-item {
-      aspect-ratio: 1;
-      border: 2px dashed var(--outline);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      background: var(--surface-container);
-    }
-    
-    .image-upload-item.add {
-      color: var(--outline);
-      flex-direction: column;
-      gap: var(--spacing-sm);
-    }
-    
-    .image-preview {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .image-remove {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.5);
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .location-info {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      margin-top: var(--spacing-md);
-      padding: var(--spacing-md);
-      background: var(--surface-container);
-      border-radius: var(--radius-sm);
-    }
-    
-    .selected-team {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-top: var(--spacing-md);
-    }
-    
-    .team-chip {
-      background: var(--primary-light);
-      color: var(--primary);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: 20px;
-      font-size: 12px;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: var(--spacing-md);
-      margin-top: var(--spacing-xl);
-    }
-    
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .modal-content {
-      background: white;
-      border-radius: var(--radius-lg);
-      width: 90%;
-      max-width: 400px;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .modal-header {
-      padding: var(--spacing-lg);
-      border-bottom: 1px solid var(--outline);
-      display: flex;
-      justify-content: space-between;
-    }
-    
-    .modal-body {
-      padding: var(--spacing-lg);
-      overflow-y: auto;
-    }
-    
-    .modal-footer {
-      padding: var(--spacing-lg);
-      border-top: 1px solid var(--outline);
-    }
-    
-    .team-checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md);
-      border-bottom: 1px solid var(--outline);
-      cursor: pointer;
-    }
-    
-    @media (prefers-color-scheme: dark) {
-      .modal-content { background: #2D2B30; }
-    }
+    .container { height: calc(100vh - 64px); overflow-y: auto; padding: var(--spacing-lg); -webkit-overflow-scrolling: touch; }
+    .image-upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin-top: var(--spacing-md); }
+    .image-upload-item { aspect-ratio: 1; border: 2px dashed var(--outline); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: var(--surface-container); }
+    .image-upload-item.add { color: var(--outline); flex-direction: column; gap: var(--spacing-sm); }
+    .image-preview { width: 100%; height: 100%; object-fit: cover; }
+    .image-remove { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; }
+    .location-info { display: flex; align-items: center; gap: var(--spacing-md); margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--surface-container); border-radius: var(--radius-sm); }
+    .selected-team { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-top: var(--spacing-md); }
+    .team-chip { background: var(--primary-light); color: var(--primary); padding: var(--spacing-sm) var(--spacing-md); border-radius: 20px; font-size: 12px; }
+    .button-group { display: flex; gap: var(--spacing-md); margin-top: var(--spacing-xl); }
+    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    .modal-content { background: white; border-radius: var(--radius-lg); width: 90%; max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; }
+    .modal-header { padding: var(--spacing-lg); border-bottom: 1px solid var(--outline); display: flex; justify-content: space-between; }
+    .modal-body { padding: var(--spacing-lg); overflow-y: auto; }
+    .modal-footer { padding: var(--spacing-lg); border-top: 1px solid var(--outline); }
+    .team-checkbox-item { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border-bottom: 1px solid var(--outline); cursor: pointer; }
+    @media (prefers-color-scheme: dark) { .modal-content { background: #2D2B30; } }
   </style>
   <script src="api.js"></script>
 </head>
 <body>
   <div class="app-bar">
     <div class="app-title" id="pageTitle">New Activity</div>
-    <button class="icon-button" onclick="goBack()">
-      <span class="material-icons-round">close</span>
-    </button>
+    <button class="icon-button" onclick="goBack()"><span class="material-icons-round">close</span></button>
   </div>
-  
   <div class="container">
     <div class="form-card card">
-      <div class="form-group">
-        <label class="form-label required">Date of Activity</label>
-        <input type="date" class="form-input" id="activityDate" required>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label required">Description of Activity</label>
-        <textarea class="form-input" id="description" placeholder="Describe your activity..." rows="4" required></textarea>
-      </div>
-      
-      <div class="image-upload-section">
-        <label class="form-label">Activity Images (Max 6)</label>
-        <div class="image-upload-grid" id="imageGrid">
-          <div class="image-upload-item add" onclick="openImageSource()">
-            <span class="material-icons-round">add_photo_alternate</span>
-            <span style="font-size: 12px;">Add Photo</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="location-section">
-        <label class="form-label">Location</label>
-        <button class="btn btn-secondary" onclick="getLocation()" type="button" style="width: 100%;">
-          <span class="material-icons-round">location_on</span> Get Current Location
-        </button>
-        <div class="location-info" id="locationInfo" style="display: none;">
-          <span class="material-icons-round">location_on</span>
-          <div class="location-text" id="locationText"></div>
-          <button class="icon-button" onclick="clearLocation()">
-            <span class="material-icons-round">close</span>
-          </button>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Activity Team Member</label>
-        <button class="btn btn-secondary" onclick="showTeamSelector()" type="button" style="width: 100%;">
-          <span class="material-icons-round">group_add</span> Select Team Members
-        </button>
-        <div class="selected-team" id="selectedTeam"></div>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Submitted By</label>
-        <input type="text" class="form-input" id="submittedByName" readonly>
-      </div>
-      
-      <div class="button-group">
-        <button class="btn btn-secondary btn-full" onclick="cancelActivity()">Cancel</button>
-        <button class="btn btn-primary btn-full" onclick="saveActivity()">Save Activity</button>
-      </div>
+      <div class="form-group"><label class="form-label required">Date of Activity</label><input type="date" class="form-input" id="activityDate" required></div>
+      <div class="form-group"><label class="form-label required">Description of Activity</label><textarea class="form-input" id="description" placeholder="Describe your activity..." rows="4" required></textarea></div>
+      <div class="image-upload-section"><label class="form-label">Activity Images (Max 6)</label><div class="image-upload-grid" id="imageGrid"><div class="image-upload-item add" onclick="openImageSource()"><span class="material-icons-round">add_photo_alternate</span><span style="font-size:12px;">Add Photo</span></div></div></div>
+      <div class="location-section"><label class="form-label">Location</label><button class="btn btn-secondary" onclick="getLocation()" type="button" style="width:100%;"><span class="material-icons-round">location_on</span> Get Current Location</button><div class="location-info" id="locationInfo" style="display:none;"><span class="material-icons-round">location_on</span><div class="location-text" id="locationText"></div><button class="icon-button" onclick="clearLocation()"><span class="material-icons-round">close</span></button></div></div>
+      <div class="form-group"><label class="form-label">Activity Team Member</label><button class="btn btn-secondary" onclick="showTeamSelector()" type="button" style="width:100%;"><span class="material-icons-round">group_add</span> Select Team Members</button><div class="selected-team" id="selectedTeam"></div></div>
+      <div class="form-group"><label class="form-label">Submitted By</label><input type="text" class="form-input" id="submittedByName" readonly></div>
+      <div class="button-group"><button class="btn btn-secondary btn-full" onclick="cancelActivity()">Cancel</button><button class="btn btn-primary btn-full" onclick="saveActivity()">Save Activity</button></div>
     </div>
   </div>
-  
-  <div class="loading-overlay" id="loading">
-    <div class="spinner"></div>
-    <div id="loadingText">Saving...</div>
-  </div>
-  
+  <div class="loading-overlay" id="loading"><div class="spinner"></div><div id="loadingText">Saving...</div></div>
   <div class="toast-container" id="toastContainer"></div>
-  
   <script>
-    const state = {
-      images: [],
-      location: null,
-      currentUser: null,
-      selectedTeamMembers: [],
-      allTeamMembers: [],
-      editId: null
-    };
+    const state = { images: [], location: null, currentUser: null, selectedTeamMembers: [], allTeamMembers: [], editId: null };
     
     async function init() {
       const savedUser = localStorage.getItem('trackmaster_user');
-      if (savedUser) {
-        try {
-          const userData = JSON.parse(savedUser);
-          if (Date.now() < userData.expiry) state.currentUser = userData;
-        } catch (e) {}
-      }
-      
-      if (!state.currentUser) {
-        window.location.href = 'login.html';
-        return;
-      }
-      
+      if (savedUser) { try { const userData = JSON.parse(savedUser); if (Date.now() < userData.expiry) state.currentUser = userData; } catch (e) {} }
+      if (!state.currentUser) { window.location.href = 'login.html'; return; }
       state.selectedTeamMembers = [state.currentUser.staffId];
       document.getElementById('submittedByName').value = state.currentUser.name;
-      
       await loadTeamMembers();
-      
       const urlParams = new URLSearchParams(window.location.search);
       state.editId = urlParams.get('edit');
-      
-      if (state.editId) {
-        document.getElementById('pageTitle').textContent = 'Edit Activity';
-        await loadActivityForEdit(state.editId);
-      } else {
-        document.getElementById('activityDate').value = new Date().toISOString().split('T')[0];
-      }
+      if (state.editId) { document.getElementById('pageTitle').textContent = 'Edit Activity'; await loadActivityForEdit(state.editId); }
+      else { document.getElementById('activityDate').value = new Date().toISOString().split('T')[0]; }
     }
     
-    async function loadTeamMembers() {
-      try {
-        const result = await API.getTeamMembers();
-        if (result.success) state.allTeamMembers = result.members;
-      } catch (error) {
-        console.error('Error loading team members:', error);
-      }
-    }
+    async function loadTeamMembers() { try { const result = await API.getTeamMembers(); if (result.success) state.allTeamMembers = result.members; } catch (error) { console.error('Error loading team members:', error); } }
     
     async function loadActivityForEdit(rowId) {
       try {
@@ -278,210 +74,75 @@
           if (activity) {
             document.getElementById('activityDate').value = activity.date;
             document.getElementById('description').value = activity.description;
-            
-            if (activity.location) {
-              state.location = activity.location;
-              document.getElementById('locationText').textContent = activity.location;
-              document.getElementById('locationInfo').style.display = 'flex';
-            }
-            
-            if (activity.images?.length) {
-              state.images = activity.images;
-              renderImageGrid();
-            }
-            
-            if (activity.teamMembers?.length) {
-              state.selectedTeamMembers = activity.teamMembers;
-              updateSelectedTeamDisplay();
-            }
+            if (activity.location) { state.location = activity.location; document.getElementById('locationText').textContent = activity.location; document.getElementById('locationInfo').style.display = 'flex'; }
+            if (activity.images?.length) { state.images = activity.images; renderImageGrid(); }
+            if (activity.teamMembers?.length) { state.selectedTeamMembers = activity.teamMembers; updateSelectedTeamDisplay(); }
           }
         }
-      } catch (error) {
-        showToast('Error loading activity', 'error');
-      }
+      } catch (error) { showToast('Error loading activity', 'error'); }
     }
     
     function showTeamSelector() {
       if (!state.allTeamMembers.length) return;
-      
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.id = 'teamModal';
-      
-      modal.innerHTML = `
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3>Select Team Members</h3>
-            <button class="icon-button" onclick="closeTeamModal()"><span class="material-icons-round">close</span></button>
-          </div>
-          <div class="modal-body">
-            ${state.allTeamMembers.map(m => `
-              <div class="team-checkbox-item" onclick="toggleMember('${m.staffId}')">
-                <input type="checkbox" id="member_${m.staffId}" value="${m.staffId}" ${state.selectedTeamMembers.includes(m.staffId) ? 'checked' : ''}>
-                <label for="member_${m.staffId}"><strong>${escapeHtml(m.name)}</strong><br><small>${escapeHtml(m.designation || 'Team Member')}</small></label>
-              </div>
-            `).join('')}
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary btn-full" onclick="confirmTeamSelection()">Done</button>
-          </div>
-        </div>
-      `;
-      
+      const modal = document.createElement('div'); modal.className = 'modal'; modal.id = 'teamModal';
+      modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>Select Team Members</h3><button class="icon-button" onclick="closeTeamModal()"><span class="material-icons-round">close</span></button></div><div class="modal-body">${state.allTeamMembers.map(m => `<div class="team-checkbox-item" onclick="toggleMember('${m.staffId}')"><input type="checkbox" id="member_${m.staffId}" value="${m.staffId}" ${state.selectedTeamMembers.includes(m.staffId)?'checked':''}><label for="member_${m.staffId}"><strong>${escapeHtml(m.name)}</strong><br><small>${escapeHtml(m.designation||'Team Member')}</small></label></div>`).join('')}</div><div class="modal-footer"><button class="btn btn-primary btn-full" onclick="confirmTeamSelection()">Done</button></div></div>`;
       document.body.appendChild(modal);
     }
     
-    function toggleMember(staffId) {
-      const checkbox = document.getElementById(`member_${staffId}`);
-      if (checkbox) checkbox.checked = !checkbox.checked;
-    }
-    
-    function closeTeamModal() {
-      document.getElementById('teamModal')?.remove();
-    }
-    
-    function confirmTeamSelection() {
-      const checkboxes = document.querySelectorAll('#teamModal input:checked');
-      state.selectedTeamMembers = Array.from(checkboxes).map(cb => cb.value);
-      updateSelectedTeamDisplay();
-      closeTeamModal();
-    }
-    
+    function toggleMember(staffId) { const checkbox = document.getElementById(`member_${staffId}`); if (checkbox) checkbox.checked = !checkbox.checked; }
+    function closeTeamModal() { document.getElementById('teamModal')?.remove(); }
+    function confirmTeamSelection() { const checkboxes = document.querySelectorAll('#teamModal input:checked'); state.selectedTeamMembers = Array.from(checkboxes).map(cb => cb.value); updateSelectedTeamDisplay(); closeTeamModal(); }
     function updateSelectedTeamDisplay() {
       const selectedDiv = document.getElementById('selectedTeam');
       if (state.selectedTeamMembers.length) {
         const names = state.allTeamMembers.filter(m => state.selectedTeamMembers.includes(m.staffId)).map(m => m.name);
         selectedDiv.innerHTML = names.map(n => `<span class="team-chip">${escapeHtml(n)}</span>`).join('');
-      } else {
-        selectedDiv.innerHTML = '';
-      }
+      } else { selectedDiv.innerHTML = ''; }
     }
     
     function openImageSource() {
-      if (state.images.length >= 6) {
-        showToast('Maximum 6 images allowed', 'warning');
-        return;
-      }
-      
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.multiple = true;
-      input.onchange = (e) => {
-        Array.from(e.target.files).forEach(file => {
-          if (state.images.length >= 6) return;
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            state.images.push(event.target.result);
-            renderImageGrid();
-          };
-          reader.readAsDataURL(file);
-        });
-      };
+      if (state.images.length >= 6) { showToast('Maximum 6 images allowed', 'warning'); return; }
+      const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+      input.onchange = (e) => { Array.from(e.target.files).forEach(file => { if (state.images.length >= 6) return; const reader = new FileReader(); reader.onload = (event) => { state.images.push(event.target.result); renderImageGrid(); }; reader.readAsDataURL(file); }); };
       input.click();
     }
     
     function renderImageGrid() {
       const grid = document.getElementById('imageGrid');
-      let html = '';
-      state.images.forEach((img, i) => {
-        html += `<div class="image-upload-item"><img src="${img}" class="image-preview"><button class="image-remove" onclick="removeImage(${i})">✕</button></div>`;
-      });
-      if (state.images.length < 6) {
-        html += '<div class="image-upload-item add" onclick="openImageSource()"><span class="material-icons-round">add_photo_alternate</span><span>Add Photo</span></div>';
-      }
+      let html = state.images.map((img,i) => `<div class="image-upload-item"><img src="${img}" class="image-preview"><button class="image-remove" onclick="removeImage(${i})">✕</button></div>`).join('');
+      if (state.images.length < 6) html += '<div class="image-upload-item add" onclick="openImageSource()"><span class="material-icons-round">add_photo_alternate</span><span>Add Photo</span></div>';
       grid.innerHTML = html;
     }
     
-    function removeImage(index) {
-      state.images.splice(index, 1);
-      renderImageGrid();
-    }
+    function removeImage(index) { state.images.splice(index, 1); renderImageGrid(); }
     
     function getLocation() {
-      if (!navigator.geolocation) {
-        showToast('Geolocation not supported', 'error');
-        return;
-      }
-      
+      if (!navigator.geolocation) { showToast('Geolocation not supported', 'error'); return; }
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          state.location = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
-          document.getElementById('locationText').textContent = `Lat: ${position.coords.latitude.toFixed(6)}, Lng: ${position.coords.longitude.toFixed(6)}`;
-          document.getElementById('locationInfo').style.display = 'flex';
-        },
+        (position) => { state.location = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`; document.getElementById('locationText').textContent = `Lat: ${position.coords.latitude.toFixed(6)}, Lng: ${position.coords.longitude.toFixed(6)}`; document.getElementById('locationInfo').style.display = 'flex'; },
         () => showToast('Could not get location', 'error')
       );
     }
     
-    function clearLocation() {
-      state.location = null;
-      document.getElementById('locationInfo').style.display = 'none';
-    }
+    function clearLocation() { state.location = null; document.getElementById('locationInfo').style.display = 'none'; }
     
     async function saveActivity() {
       const date = document.getElementById('activityDate').value;
       const description = document.getElementById('description').value.trim();
-      
-      if (!date || !description) {
-        showToast('Please fill required fields', 'error');
-        return;
-      }
-      
-      const activityData = {
-        date,
-        description,
-        images: state.images,
-        location: state.location,
-        teamMembers: state.selectedTeamMembers,
-        submittedBy: state.currentUser.staffId
-      };
-      
+      if (!date || !description) { showToast('Please fill required fields', 'error'); return; }
+      const activityData = { date, description, images: state.images, location: state.location, teamMembers: state.selectedTeamMembers, submittedBy: state.currentUser.staffId };
       document.getElementById('loading').style.display = 'flex';
-      
       try {
-        const result = state.editId 
-          ? await API.updateActivity(state.editId, activityData)
-          : await API.saveActivity(activityData);
-        
-        if (result.success) {
-          showToast(state.editId ? 'Activity updated!' : 'Activity saved!', 'success');
-          setTimeout(() => window.location.href = 'index.html', 1000);
-        } else {
-          showToast(result.message || 'Error saving activity', 'error');
-        }
-      } catch (error) {
-        showToast('Error saving activity', 'error');
-      } finally {
-        document.getElementById('loading').style.display = 'none';
-      }
+        const result = state.editId ? await API.updateActivity(state.editId, activityData) : await API.saveActivity(activityData);
+        if (result.success) { showToast(state.editId ? 'Activity updated!' : 'Activity saved!', 'success'); setTimeout(() => window.location.href = 'index.html', 1000); }
+        else { showToast(result.message || 'Error saving activity', 'error'); }
+      } catch (error) { showToast('Error saving activity', 'error'); } finally { document.getElementById('loading').style.display = 'none'; }
     }
     
-    function cancelActivity() {
-      if (confirm('Discard changes?')) window.location.href = 'index.html';
-    }
-    
+    function cancelActivity() { if (confirm('Discard changes?')) window.location.href = 'index.html'; }
     function goBack() { cancelActivity(); }
-    
-    function escapeHtml(unsafe) {
-      if (!unsafe) return '';
-      return String(unsafe).replace(/[&<>"']/g, (m) => {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        if (m === '"') return '&quot;';
-        return '&#039;';
-      });
-    }
-    
-    function showToast(message, type) {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.getElementById('toastContainer').appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-    
+    function escapeHtml(unsafe) { if (!unsafe) return ''; return String(unsafe).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]); }
+    function showToast(message, type) { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = message; document.getElementById('toastContainer').appendChild(toast); setTimeout(() => toast.remove(), 3000); }
     window.onload = init;
   </script>
 </body>
