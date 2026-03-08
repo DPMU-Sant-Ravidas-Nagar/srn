@@ -479,22 +479,25 @@ textarea.form-input {
   color: var(--outline);
 }
 
-/* Report Types */
+/* Report Types - Updated to match image */
 .report-types {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 24px;
 }
 
 .report-type-card {
   background: var(--surface-container);
-  border-radius: var(--radius-md);
+  border-radius: 16px;
   padding: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   cursor: pointer;
   transition: all 0.2s;
   border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .report-type-card.selected {
@@ -506,19 +509,59 @@ textarea.form-input {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: var(--primary-light);
+  background: white;
   color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 12px;
-  font-size: 20px;
+  font-size: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .report-type-card.selected .report-icon {
   background: var(--primary);
   color: white;
 }
+
+.report-text {
+  flex: 1;
+}
+
+.report-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+
+.report-desc {
+  font-size: 13px;
+  color: var(--outline);
+  line-height: 1.4;
+}
+
+.report-type-card.selected .report-title {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.report-type-card.selected .report-desc {
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+@media (prefers-color-scheme: dark) {
+  .report-icon {
+    background: #2D2B30;
+    color: var(--primary-light);
+  }
+  
+  .report-type-card.selected .report-icon {
+    background: var(--primary);
+    color: white;
+  }
+}
+
 
 /* Format Options */
 .format-options {
@@ -766,4 +809,87 @@ textarea.form-input {
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* Additional styles for tabs */
+.nav-item {
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding: 5px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-chip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--surface-container);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.filter-chip.active {
+  background: var(--primary);
+  color: white;
+}
+
+.filter-chip:active {
+  transform: scale(0.95);
+}
+
+.badge {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Activity item hover effect */
+.activity-item {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.activity-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.activity-item.pending {
+  border-left-color: var(--warning);
+}
+
+/* Team member hover */
+.team-member {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.team-member:active {
+  transform: scale(0.98);
+}
+
+/* More item hover */
+.more-item {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.more-item:active {
+  background: var(--primary-light);
 }
